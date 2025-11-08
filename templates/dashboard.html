@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grease Analysis</title>
+    <title>Schneider Project YCP Hacks</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static',filename='favicon.ico')}}">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -129,8 +130,19 @@
         .data-table th {
             background-color: #f8f9fa;
         }
+        .error-message{
+            color: red;
+            background-color: #ffe6e6;
+            padding: 10px;
+            margin: 10px 0;
+            display:none;
+        }
+        .form-group{
+            margin-bottom: 15px;
+        }
     </style>
 </head>
+   
 <body>
     <div class="container">
         <header>
@@ -152,96 +164,57 @@
         
         <!-- File Input Section -->
         <div class="input-section">
-            <h2>Upload Grease Sample Images</h2>
+            <h2>Upload CSVs</h2>
             
-            <div class="file-inputs">
-                <div class="file-input-group">
-                    <label for="standardImage">CSV Input:</label>
-                    <input type="file" id="standardImage" accept=".csv">
+            <form method="post" action="/upload" enctype="multipart/form-data">
+                <div>
+                    <input type="file" id="csvInput" name="csvFile" accept=".csv" required>
+                    <div id="errorField" style="color: red; font-size: 14px; margin-top: 5px;">
+                    </div>
                 </div>
-            </div>
-            
-            <div class="file-inputs">
-                <div class="file-input-group">
-                    <label for="sampleId">Sample ID:</label>
-                    <input type="text" id="sampleId" placeholder="Enter sample ID (e.g., 12345)">
-                </div>
-            </div>
-            
-            <button class="process-btn" onclick="processImages()">
-                Analyze Images & Update Graph
-            </button>
+        <button class ="process-btn" type="submit" onclick="return checkFile()">Upload CSV</button>
+    </form>
         </div>
         
-        <!-- Results Section -->
-        <div class="results-section">
-            <h2>Analysis Results</h2>
-            
-            <div class="color-comparison">
-                <div class="color-box">
-                    <div class="color-swatch" id="standardColor"></div>
-                    <div><strong>Standard Grease</strong></div>
-                    <div id="standardRGB">RGB: --</div>
-                </div>
-                <div class="color-box">
-                    <div class="color-swatch" id="testColor"></div>
-                    <div><strong>Test Grease</strong></div>
-                    <div id="testRGB">RGB: --</div>
-                </div>
-            </div>
-            
-            {% if samples %}
-            <table class="data-table">
-                <tr>
-                    <th>Sample ID</th>
-                    <th>Standard RGB</th>
-                    <th>Test RGB</th>
-                    <th>Image File</th>
-                    <th>Timestamp</th>
-                </tr>
-                {% for sample in samples %}
-                <tr>
-                    <td>{{ sample.sample_id }}</td>
-                    <td>{{ sample.standard_rgb[0] }}, {{ sample.standard_rgb[1] }}, {{ sample.standard_rgb[2] }}</td>
-                    <td>{{ sample.test_rgb[0] }}, {{ sample.test_rgb[1] }}, {{ sample.test_rgb[2] }}</td>
-                    <td>{{ sample.image_filename }}</td>
-                    <td>{{ sample.timestamp }}</td>
-                </tr>
-                {% endfor %}
-            </table>
-            {% else %}
-            <p>No data yet. Upload and analyze images to see results here!</p>
-            {% endif %}
-        </div>
+        
     </div>
 
     <script>
         function processImages() {
-            const standardFile = document.getElementById('standardImage').files[0];
-            const testFile = document.getElementById('testImage').files[0];
-            const sampleId = document.getElementById('sampleId').value;
+             const fileInput = document.getElementById('csvInput');
+            const errorField = document.getElementById('errorField');
             
-            if (!standardFile || !testFile) {
-                alert('Please select both standard and test grease images!');
-                return;
+            // Clear previous errors
+            errorField.style.display = 'none';
+            errorField.textContent = '';
+            
+            // Check if file is selected
+            if (!fileInput.files || fileInput.files.length === 0) {
+                showError('Please select a CSV file');
+                return false;
             }
             
-            if (!sampleId) {
-                alert('Please enter a Sample ID!');
-                return;
+            // Check file type
+            const file = fileInput.files[0];
+            if (!file.name.toLowerCase().endsWith('.csv')) {
+                showError('Please upload a CSV file only');
+                return false;
             }
             
-            // For demo purposes - show some sample colors
-            document.getElementById('standardColor').style.backgroundColor = 'rgb(120, 80, 200)';
-            document.getElementById('testColor').style.backgroundColor = 'rgb(200, 150, 50)';
-            document.getElementById('standardRGB').textContent = 'RGB: 120, 80, 200';
-            document.getElementById('testRGB').textContent = 'RGB: 200, 150, 50';
-            
-            alert('Images uploaded! In the full version, this would:\n1. Send images to Python backend\n2. Analyze color data\n3. Update the graph with results\n4. Show real RGB values');
-            
-            // TODO: Connect to Python backend for actual processing
-            // This would send the files to your Flask API for analysis
+            return true;
         }
+        
+        function showError(message) {
+            const errorField = document.getElementById('errorField');
+            errorField.textContent = message;
+            errorField.style.display = 'block';
+        }
+        
+        // Real-time validation when file is selected
+        document.getElementById('csvInput').addEventListener('change', function() {
+            const errorField = document.getElementById('errorField');
+            errorField.style.display = 'none'; // Hide errors when user selects new file
+        });
     </script>
 </body>
 </html>
