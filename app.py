@@ -8,6 +8,12 @@ import base64
 import sqlite3
 import uuid
 from werkzeug.utils import secure_filename
+from io import BytesIO
+import base64
+
+# Global state for loaded data
+baseline_file = None
+sample_batch = []
 
 app = Flask(__name__)
 

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grease Plotter</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2em; background: #f6f6f6; }
+    h1 { color: #333; }
+    #sampleList button {
+      display: block;
+      margin: 0.5em 0;
+      padding: 0.5em 1em;
+      border: none;
+      background: #007bff;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #sampleList button:hover {
+      background: #0056b3;
+    }
+    #graph {
+      display: block;
+      margin-top: 1em;
+      max-width: 100%;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <h1>Grease Plotter</h1>
+
+  <form id="uploadForm">
+    <label>Baseline: <input type="file" name="baseline" required /></label><br><br>
+    <label>Samples: <input type="file" name="samples" multiple required /></label><br><br>
+    <button type="submit">Upload and Process</button>
+  </form>
+
+  <h3>Samples</h3>
+  <div id="sampleList"></div>
+
+  <img id="graph" src="" alt="Graph preview" />
+
+  <br>
+  <button id="downloadAll">Download All Graphs (ZIP)</button>
+
+  <script>
+    const form = document.getElementById("uploadForm");
+    const list = document.getElementById("sampleList");
+    const graph = document.getElementById("graph");
+
+    form.onsubmit = (e) => {
+      e.preventDefault();
+      const data = new FormData(form);
+      fetch("/upload", { method: "POST", body: data })
+        .then((res) => res.json())
+        .then((data) => {
+          alert(data.message);
+          loadSamples();
+        });
+    };
+
+    function loadSamples() {
+      fetch("/get_samples")
+        .then((res) => res.json())
+        .then((samples) => {
+          list.innerHTML = "";
+          samples.forEach((s) => {
+            const btn = document.createElement("button");
+            btn.textContent = s.filename;
+            btn.onclick = () => { graph.src = s.graph; };
+            list.appendChild(btn);
+          });
+        });
+    }
+
+    document.getElementById("downloadAll").onclick = () => {
+      fetch("/export_all", { method: "POST" })
+        .then(res => {
+          if (res.ok) return res.blob();
+          throw new Error("Download failed");
+        })
+        .then(blob => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "graphs.zip";
+          a.click();
+          URL.revokeObjectURL(url);
+        });
+    };
+  </script>
+</body>
+</html>
