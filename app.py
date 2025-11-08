@@ -172,17 +172,17 @@ def upload_file():
                 if os.path.exists(filepath):
                     os.remove(filepath)
     
-    if success_count == 0:
+        if success_count == 0:
+            return jsonify({
+                'success': False, 
+                'message': f'No files uploaded. Errors: {"; ".join(error_files)}'
+            }), 400
+        
         return jsonify({
-            'success': False, 
-            'message': f'No files uploaded. Errors: {"; ".join(error_files)}'
-        }), 400
-    
-    return jsonify({
-        'success': True,
-        'message': f'Successfully uploaded {success_count} file(s)',
-        'count': success_count
-    })
+            'success': True,
+            'message': f'Successfully uploaded {success_count} file(s)',
+            'count': success_count
+        })
     
     # Return results
     if success_count == 0 and not error_files:
