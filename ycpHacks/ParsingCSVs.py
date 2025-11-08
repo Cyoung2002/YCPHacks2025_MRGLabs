@@ -1,6 +1,6 @@
 import pandas as pd
 
-df = pd.read_csv('/Users/caroline/PycharmProjects/YCPHacks2025_MRGLabs/ycpHacks/Mobilgrease 28.csv', usecols=range(0,1))
+df = pd.read_csv('C:\YCPHacks2025\YCPHacks2025_MRGLabs\ycpHacks\Mobilgrease 28.csv', usecols=range(0,1))
 
 subset = df.iloc[3:3454]
 
