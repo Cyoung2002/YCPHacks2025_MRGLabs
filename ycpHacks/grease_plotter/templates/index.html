@@ -3,62 +3,235 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Grease Plotter</title>
+  <title>Grease Plotter - MLH Hackathon</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 2em; background: #f6f6f6; }
-    h1 { color: #333; }
-    #sampleList button {
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 2em;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 2em;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 2em;
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 0.5em;
+      font-size: 2.5em;
+    }
+
+    .subtitle {
+      color: #666;
+      font-size: 1.1em;
+    }
+
+    .upload-section {
+      background: #f8f9fa;
+      padding: 1.5em;
+      border-radius: 10px;
+      margin-bottom: 2em;
+    }
+
+    .form-group {
+      margin-bottom: 1.5em;
+    }
+
+    label {
       display: block;
-      margin: 0.5em 0;
-      padding: 0.5em 1em;
+      margin-bottom: 0.5em;
+      font-weight: 600;
+      color: #333;
+    }
+
+    input[type="file"] {
+      width: 100%;
+      padding: 0.8em;
+      border: 2px dashed #ddd;
+      border-radius: 8px;
+      background: white;
+      transition: border-color 0.3s;
+    }
+
+    input[type="file"]:hover {
+      border-color: #007bff;
+    }
+
+    .btn {
+      padding: 0.8em 1.5em;
       border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 1em;
+    }
+
+    .btn-primary {
       background: #007bff;
       color: white;
-      border-radius: 5px;
-      cursor: pointer;
     }
-    #sampleList button:hover {
+
+    .btn-primary:hover {
       background: #0056b3;
+      transform: translateY(-2px);
     }
+
+    .btn-secondary {
+      background: #28a745;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: #1e7e34;
+      transform: translateY(-2px);
+    }
+
+    .samples-section {
+      margin: 2em 0;
+    }
+
+    .sample-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1em;
+      margin: 1em 0;
+    }
+
+    .sample-btn {
+      padding: 0.8em;
+      border: none;
+      background: #6c757d;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+      font-size: 0.9em;
+    }
+
+    .sample-btn:hover {
+      background: #545b62;
+      transform: translateY(-2px);
+    }
+
+    .sample-btn.active {
+      background: #007bff;
+    }
+
+    .graph-container {
+      text-align: center;
+      margin: 2em 0;
+      padding: 1em;
+      background: #f8f9fa;
+      border-radius: 10px;
+    }
+
     #graph {
-      display: block;
-      margin-top: 1em;
       max-width: 100%;
       border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .download-section {
+      text-align: center;
+      margin-top: 2em;
+      padding-top: 2em;
+      border-top: 2px solid #eee;
     }
   </style>
 </head>
 <body>
-  <h1>Grease Plotter</h1>
+  <div class="container">
+    <div class="header">
+      <h1>🧪 Grease Plotter</h1>
+      <p class="subtitle">Upload your samples and visualize grease data</p>
+    </div>
 
-  <form id="uploadForm">
-    <label>Baseline: <input type="file" name="baseline" required /></label><br><br>
-    <label>Samples: <input type="file" name="samples" multiple required /></label><br><br>
-    <button type="submit">Upload and Process</button>
-  </form>
+    <div class="upload-section">
+      <form id="uploadForm">
+        <div class="form-group">
+          <label for="baseline">Baseline File</label>
+          <input type="file" id="baseline" name="baseline" required />
+        </div>
 
-  <h3>Samples</h3>
-  <div id="sampleList"></div>
+        <div class="form-group">
+          <label for="samples">Sample Files</label>
+          <input type="file" id="samples" name="samples" multiple required />
+        </div>
 
-  <img id="graph" src="" alt="Graph preview" />
+        <button type="submit" class="btn btn-primary">Upload and Process</button>
+      </form>
+    </div>
 
-  <br>
-  <button id="downloadAll">Download All Graphs (ZIP)</button>
+    <div class="samples-section">
+      <h3>📊 Sample Results</h3>
+      <div id="sampleList" class="sample-grid"></div>
+    </div>
+
+    <div class="graph-container">
+      <img id="graph" src="" alt="Graph preview" />
+    </div>
+
+    <div class="download-section">
+      <button id="downloadAll" class="btn btn-secondary">📥 Download All Graphs (ZIP)</button>
+    </div>
+  </div>
 
   <script>
     const form = document.getElementById("uploadForm");
     const list = document.getElementById("sampleList");
     const graph = document.getElementById("graph");
 
+    function showLoading() {
+      const loading = document.createElement('div');
+      loading.id = 'loading';
+      loading.innerHTML = 'Processing...';
+      loading.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0,0,0,0.8);
+        color: white;
+        padding: 1em 2em;
+        border-radius: 8px;
+        z-index: 1000;
+      `;
+      document.body.appendChild(loading);
+    }
+
+    function hideLoading() {
+      const loading = document.getElementById('loading');
+      if (loading) loading.remove();
+    }
+
     form.onsubmit = (e) => {
       e.preventDefault();
+      showLoading();
       const data = new FormData(form);
       fetch("/upload", { method: "POST", body: data })
         .then((res) => res.json())
         .then((data) => {
+          hideLoading();
           alert(data.message);
           loadSamples();
+        })
+        .catch(error => {
+          hideLoading();
+          alert('Error: ' + error.message);
         });
     };
 
@@ -67,10 +240,21 @@
         .then((res) => res.json())
         .then((samples) => {
           list.innerHTML = "";
-          samples.forEach((s) => {
+          samples.forEach((s, index) => {
             const btn = document.createElement("button");
+            btn.className = "sample-btn";
             btn.textContent = s.filename;
-            btn.onclick = () => { graph.src = s.graph; };
+            btn.onclick = () => {
+              document.querySelectorAll('.sample-btn').forEach(b => b.classList.remove('active'));
+              btn.classList.add('active');
+              graph.src = s.graph;
+            };
+
+            if (index === 0) {
+              btn.classList.add('active');
+              graph.src = s.graph;
+            }
+
             list.appendChild(btn);
           });
         });
@@ -91,6 +275,9 @@
           URL.revokeObjectURL(url);
         });
     };
+
+    // Load samples on page load
+    loadSamples();
   </script>
 </body>
 </html>
