@@ -1,20 +1,24 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-df = pd.read_csv('104345.csv')
-da = pd.read_csv('Mobilgrease 28.csv')
+# Creating variables for obtaining csv file input for baseline and sample (currently just one)
+baseline = input("Enter baseline: ")
+sampleData = input("Enter sample data: ")
 
-df = pd.read_csv('104345.csv', skiprows=1)
-da = pd.read_csv('Mobilgrease 28.csv', skiprows=1)
+# Reading the imported csv files, skipping the first row since it is not needed data
+base = pd.read_csv(baseline, skiprows=1)
+sample = pd.read_csv(sampleData, skiprows=1)
 
-print(df.head())
+# Plotting the data from the csv, will need to dynamically pull the names from the files later
+plt.plot(base['cm-1'], base['A'], label='baseline', linewidth=1)
+plt.plot(sample['cm-1'], sample['A'], label='sampledata', linewidth=1)
 
-plt.plot(df['cm-1'], df['A'], label='104345', linewidth=1)
-plt.plot(da['cm-1'], da['A'], label='Mobilgrease 28', linewidth=1)
-
+# Axis labels
 plt.xlabel('cm-1')
 plt.ylabel('A')
 
+# Creating legend for plot
 plt.legend()
 
+# Generating the plot
 plt.show()
