@@ -48,6 +48,16 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             margin-bottom: 30px;
             text-align: center;
+                flex: 1;
+                min-width: 300px;
+        }
+
+        .input-sections-container {
+            display: flex;
+             gap: 20px;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap; /* ensures it stacks on small screens */
         }
         
         .process-btn {
@@ -355,17 +365,34 @@
         
         <!-- File Upload Section -->
         
-         <div class="input-section">
-    <h2>Upload CSV Files</h2>
-    <form id="uploadForm" enctype="multipart/form-data">
-        <div>
-            <input type="file" id="csvInput" name="csvFile" accept=".csv" multiple required>
-            <div id="messageField" class="message"></div>
-            <div id="uploadProgress" class="upload-progress"></div>
-        </div>
-        <button class="process-btn" type="submit" id="uploadButton">Upload CSV Files</button>
-    </form>
+<div class="input-sections-container">
+    <!-- Sample Files -->
+    <div class="input-section">
+        <h2>Upload Sample Files</h2>
+        <form id="uploadSampleForm" enctype="multipart/form-data">
+            <div>
+                <input type="file" id="sampleCsvInput" name="csvFile" accept=".csv" multiple required>
+                <div id="sampleMessageField" class="message"></div>
+                <div id="sampleUploadProgress" class="upload-progress"></div>
+            </div>
+            <button class="process-btn" type="submit" id="sampleUploadButton">Upload CSV Files</button>
+        </form>
+    </div>
+
+    <!-- Baseline Files -->
+    <div class="input-section">
+        <h2>Upload Baseline Files</h2>
+        <form id="uploadBaselineForm" enctype="multipart/form-data">
+            <div>
+                <input type="file" id="baselineCsvInput" name="csvFile" accept=".csv" multiple required>
+                <div id="baselineMessageField" class="message"></div>
+                <div id="baselineUploadProgress" class="upload-progress"></div>
+            </div>
+            <button class="process-btn" type="submit" id="baselineUploadButton">Upload CSV Files</button>
+        </form>
+    </div>
 </div>
+
 <!-- Selected Files for Graph Section (Server-Side Storage) -->
 <div class="selected-files-section" style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 30px;">
     <h2> Files Selected for Analysis</h2>
