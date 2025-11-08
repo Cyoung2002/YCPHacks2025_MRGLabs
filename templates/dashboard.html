@@ -16,11 +16,11 @@
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            text-align: center;
         }
         
         header {
             margin-bottom: 30px;
+            text-align: center;
         }
         
         .graph-container {
@@ -47,31 +47,7 @@
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             margin-bottom: 30px;
-        }
-        
-        .file-inputs {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-        
-        .file-input-group {
             text-align: center;
-        }
-        
-        .file-input-group label {
-            display: block;
-            margin-bottom: 10px;
-            font-weight: bold;
-            color: #333;
-        }
-        
-        .file-input-group input {
-            padding: 10px;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
         }
         
         .process-btn {
@@ -89,29 +65,210 @@
             background: #0056b3;
         }
         
-        .results-section {
+        .process-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .error-message {
+            background-color: #ffe6e6;
+            color: #dc3545;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .success-message {
+            background-color: #e6ffe6;
+            color: #28a745;
+            border: 1px solid #c3e6cb;
+        }
+        
+        /* File Browser Styles */
+        .file-browser {
             background: white;
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
         }
         
-        .color-comparison {
+        .search-bar {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+        
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .file-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            background: #fafafa;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .file-card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .file-card.expanded {
+            grid-column: 1 / -1;
+            background: #f8f9fa;
+            border-color: #007bff;
+        }
+        
+        .file-header {
             display: flex;
-            justify-content: center;
-            gap: 40px;
-            margin: 20px 0;
-        }        
-        .error-message{
-            color: red;
-            background-color: #ffe6e6;
-            padding: 10px;
-            margin: 10px 0;
-            display:none;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
         }
-        .form-group{
+        
+        .file-name {
+            font-weight: bold;
+            color: #333;
+            word-break: break-word;
+            flex: 1;
+            margin-right: 10px;
+        }
+        
+        .file-meta {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .file-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .btn-view {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-download {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+        }
+        
+        .file-preview {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            margin-top: 15px;
+        }
+        
+        .file-card.expanded .file-preview {
+            max-height: 400px;
+        }
+        
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            background: white;
+        }
+        
+        .preview-table th,
+        .preview-table td {
+            border: 1px solid #ddd;
+            padding: 6px;
+            text-align: left;
+        }
+        
+        .preview-table th {
+            background: #f8f9fa;
+            font-weight: bold;
+        }
+        
+        .expand-icon {
+            font-size: 18px;
+            color: #666;
+            transition: transform 0.3s ease;
+        }
+        
+        .file-card.expanded .expand-icon {
+            transform: rotate(180deg);
+            color: #007bff;
+        }
+        
+        .no-files {
+            text-align: center;
+            color: #666;
+            padding: 40px;
+            grid-column: 1 / -1;
+        }
+        
+        .file-count {
+            color: #666;
             margin-bottom: 15px;
+            font-size: 14px;
         }
+        
+        .upload-progress {
+            margin: 10px 0;
+            font-size: 14px;
+            color: #666;
+        }
+        .btn-delete-all {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-delete-all:hover {
+    background: #c82333;
+}
+
+.btn-delete-all:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+}
     </style>
 </head>
    
@@ -123,68 +280,314 @@
         </header>
         
         <!-- Centered Graph Area -->
-         <!-- EDIT THE GRAPH PLACEHOLDER HERE TO BE REPLACED WITH THE GRAPH IMAGE-->
         <div class="graph-container">
             <div class="graph-placeholder">
-                📊 Graph will be displayed here<br>
+                 Graph will be displayed here<br>
                 <small>(Color analysis visualization)</small>
             </div>
         </div>
-        <!--LOOOK ABOVE-->
         
-        <!-- File Input Section -->
-        <div class="input-section">
-            <h2>Upload CSVs</h2>
-            
-            <form method="post" action="/upload" enctype="multipart/form-data">
-                <div>
-                    <input type="file" id="csvInput" name="csvFile" accept=".csv" required>
-                    <div id="errorField" style="color: red; font-size: 14px; margin-top: 5px;">
-                    </div>
-                </div>
-        <button class ="process-btn" type="submit" onclick="return checkFile()">Upload CSV</button>
-    </form>
+        <!-- File Upload Section -->
+         <div class="input-section">
+    <h2>Upload CSV Files</h2>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <div>
+            <input type="file" id="csvInput" name="csvFile" accept=".csv" multiple required>
+            <div id="messageField" class="message"></div>
+            <div id="uploadProgress" class="upload-progress"></div>
         </div>
-        
+        <button class="process-btn" type="submit" id="uploadButton">Upload CSV Files</button>
+    </form>
+</div>
+        <!-- File Browsing Section-->
+        <div class="file-browser">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="margin: 0;">File Browser</h2>
+        <button class="btn-delete-all" onclick="deleteAllFiles()" id="deleteAllButton">
+            Delete All Files
+        </button>
+    </div>
+    
+    <input type="text" id="searchBar" class="search-bar" placeholder="Search files by name..." onkeyup="filterFiles()">
+    <div class="file-count" id="fileCount">Loading files...</div>
+    
+    <div class="file-grid" id="fileGrid">
+        <!-- Files will be loaded here dynamically -->
+    </div>
+</div>
         
     </div>
 
     <script>
-        function processImages() {
-             const fileInput = document.getElementById('csvInput');
-            const errorField = document.getElementById('errorField');
-            
-            // Clear previous errors
-            errorField.style.display = 'none';
-            errorField.textContent = '';
-            
-            // Check if file is selected
-            if (!fileInput.files || fileInput.files.length === 0) {
-                showError('Please select a CSV file');
-                return false;
-            }
-            
-            // Check file type
-            const file = fileInput.files[0];
-            if (!file.name.toLowerCase().endsWith('.csv')) {
-                showError('Please upload a CSV file only');
-                return false;
-            }
-            
-            return true;
-        }
-        
-        function showError(message) {
-            const errorField = document.getElementById('errorField');
-            errorField.textContent = message;
-            errorField.style.display = 'block';
-        }
-        
-        // Real-time validation when file is selected
-        document.getElementById('csvInput').addEventListener('change', function() {
-            const errorField = document.getElementById('errorField');
-            errorField.style.display = 'none'; // Hide errors when user selects new file
+        // Handle form submission with AJAX
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            uploadFiles();
         });
+
+        // AJAX file upload
+        function uploadFiles() {
+    const fileInput = document.getElementById('csvInput');
+    const messageField = document.getElementById('messageField');
+    const uploadButton = document.getElementById('uploadButton');
+    const progressField = document.getElementById('uploadProgress');
+    
+    // Clear previous messages
+    messageField.style.display = 'none';
+    messageField.className = 'message';
+    progressField.textContent = '';
+    
+    // Validate files
+    if (!fileInput.files || fileInput.files.length === 0) {
+        showMessage('Please select at least one CSV file', 'error');
+        return;
+    }
+    
+    // Check file types
+    for (let file of fileInput.files) {
+        if (!file.name.toLowerCase().endsWith('.csv')) {
+            showMessage('Please upload only CSV files', 'error');
+            return;
+        }
+    }
+    
+    // Disable upload button and show progress
+    uploadButton.disabled = true;
+    uploadButton.textContent = 'Uploading...';
+    progressField.textContent = `Uploading ${fileInput.files.length} file(s)...`;
+    
+    // Create FormData and send AJAX request
+    const formData = new FormData();
+    for (let file of fileInput.files) {
+        formData.append('csvFile', file);
+    }
+    
+    fetch('/upload', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showMessage(data.message, 'success');
+            progressField.textContent = 'Upload complete!';
+            
+            // Clear file input
+            fileInput.value = '';
+            
+            // Refresh file browser
+            loadFiles();
+        } else {
+            showMessage(data.message, 'error');
+            progressField.textContent = 'Upload failed';
+        }
+    })
+    .catch(error => {
+        showMessage(`Upload failed: ${error.message}`, 'error');
+        progressField.textContent = 'Upload failed';
+    })
+    .finally(() => {
+        // Re-enable upload button
+        uploadButton.disabled = false;
+        uploadButton.textContent = 'Upload CSV Files';
+    });
+}
+        
+        // Show message in the message field
+        function showMessage(message, type) {
+            const messageField = document.getElementById('messageField');
+            messageField.textContent = message;
+            messageField.className = `message ${type}-message`;
+            messageField.style.display = 'block';
+        }
+        
+        // Clear errors when new file is selected
+        document.getElementById('csvInput').addEventListener('change', function() {
+            document.getElementById('messageField').style.display = 'none';
+        });
+        
+        // Load files on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFiles();
+        });
+        
+        // Load files from server
+        function loadFiles() {
+            fetch('/files-data')
+                .then(response => response.json())
+                .then(files => {
+                    displayFiles(files);
+                })
+                .catch(error => {
+                    console.error('Error loading files:', error);
+                    document.getElementById('fileGrid').innerHTML = 
+                        '<div class="no-files">Error loading files</div>';
+                });
+        }
+        
+        // Display files in the grid
+        function displayFiles(files) {
+            const fileGrid = document.getElementById('fileGrid');
+            const fileCount = document.getElementById('fileCount');
+            
+            if (files.length === 0) {
+                fileGrid.innerHTML = '<div class="no-files">No files uploaded yet</div>';
+                fileCount.textContent = 'No files';
+                return;
+            }
+            
+            fileCount.textContent = `${files.length} file${files.length !== 1 ? 's' : ''} found`;
+            
+            fileGrid.innerHTML = files.map(file => `
+                <div class="file-card" onclick="toggleExpand('${file.file_id}')" id="card-${file.file_id}">
+                    <div class="file-header">
+                        <div class="file-name" title="${file.original_name}">${file.original_name}</div>
+                        <div class="expand-icon">▼</div>
+                    </div>
+                    <div class="file-meta">
+                        Uploaded: ${new Date(file.upload_time).toLocaleString()}<br>
+                        Size: ${file.rows} rows × ${file.columns} columns<br>
+                        ID: ${file.file_id}
+                    </div>
+                    <div class="file-actions">
+                        <button class="btn btn-view" onclick="event.stopPropagation(); viewFile('${file.file_id}')">View</button>
+                        <a href="/download/${file.file_id}" class="btn btn-download" onclick="event.stopPropagation();">Download</a>
+                        <button class="btn btn-delete" onclick="event.stopPropagation(); deleteFile('${file.file_id}')">Delete</button>
+                    </div>
+                    <div class="file-preview" id="preview-${file.file_id}">
+                        <div style="text-align: center; color: #666; padding: 20px;">
+                            Loading preview...
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Toggle file card expansion
+        function toggleExpand(fileId) {
+            const card = document.getElementById(`card-${fileId}`);
+            const preview = document.getElementById(`preview-${fileId}`);
+            
+            if (card.classList.contains('expanded')) {
+                card.classList.remove('expanded');
+            } else {
+                card.classList.add('expanded');
+                // Load preview data if not already loaded
+                if (preview.innerHTML.includes('Loading preview')) {
+                    loadFilePreview(fileId);
+                }
+            }
+        }
+        
+        // Load file preview data
+        function loadFilePreview(fileId) {
+            fetch(`/file-preview/${fileId}`)
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById(`preview-${fileId}`).innerHTML = html;
+                })
+                .catch(error => {
+                    document.getElementById(`preview-${fileId}`).innerHTML = 
+                        '<div style="text-align: center; color: #dc3545; padding: 20px;">Error loading preview</div>';
+                });
+        }
+        
+        // Filter files based on search
+        function filterFiles() {
+            const searchTerm = document.getElementById('searchBar').value.toLowerCase();
+            const fileCards = document.querySelectorAll('.file-card');
+            let visibleCount = 0;
+            
+            fileCards.forEach(card => {
+                const fileName = card.querySelector('.file-name').textContent.toLowerCase();
+                if (fileName.includes(searchTerm)) {
+                    card.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            document.getElementById('fileCount').textContent = 
+                `${visibleCount} file${visibleCount !== 1 ? 's' : ''} found`;
+        }
+        
+        // Delete file with confirmation
+        function deleteFile(fileId) {
+            if (confirm('Are you sure you want to delete this file?')) {
+                fetch(`/delete/${fileId}`)
+                    .then(response => response.text())
+                    .then(result => {
+                        showMessage('File deleted successfully', 'success');
+                        loadFiles(); // Reload the file list
+                    })
+                    .catch(error => {
+                        showMessage('Error deleting file', 'error');
+                    });
+            }
+        }
+        // Delete all files with confirmation
+function deleteAllFiles() {
+    const fileCount = document.querySelectorAll('.file-card').length;
+    
+    if (fileCount === 0) {
+        showMessage('No files to delete', 'error');
+        return;
+    }
+    
+    if (confirm(`Are you sure you want to delete ALL ${fileCount} files? This action cannot be undone!`)) {
+        const deleteButton = document.getElementById('deleteAllButton');
+        deleteButton.disabled = true;
+        deleteButton.textContent = 'Deleting...';
+        
+        fetch('/delete-all', {
+            method: 'POST'
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(text => { throw new Error(text) });
+            }
+            return response.text();
+        })
+        .then(result => {
+            showMessage(`Successfully deleted all ${fileCount} files`, 'success');
+            loadFiles(); // Refresh the file list
+        })
+        .catch(error => {
+            showMessage(`Error deleting all files: ${error.message}`, 'error');
+        })
+        .finally(() => {
+            deleteButton.disabled = false;
+            deleteButton.textContent = '🗑️ Delete All Files';
+        });
+    }
+}
+
+// Update the loadFiles function to hide delete all button when no files
+function loadFiles() {
+    fetch('/files-data')
+        .then(response => response.json())
+        .then(files => {
+            displayFiles(files);
+            // Show/hide delete all button based on whether there are files
+            const deleteAllButton = document.getElementById('deleteAllButton');
+            if (files.length === 0) {
+                deleteAllButton.style.display = 'none';
+            } else {
+                deleteAllButton.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            console.error('Error loading files:', error);
+            document.getElementById('fileGrid').innerHTML = 
+                '<div class="no-files">Error loading files</div>';
+            document.getElementById('deleteAllButton').style.display = 'none';
+        });
+}
+        // View file (same as expand)
+        function viewFile(fileId) {
+            toggleExpand(fileId);
+        }
     </script>
 </body>
 </html>
