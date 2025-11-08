@@ -34,5 +34,9 @@ def get_samples():
     """API endpoint to get all sample data (optional, for JavaScript)"""
     return jsonify(sample_data)
 
+# @app.route('/api/graph')
+# def get_graph():
+#     return send_file(graph_image_path,mimetype='image/png')
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
