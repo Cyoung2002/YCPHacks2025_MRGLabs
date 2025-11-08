@@ -16,8 +16,8 @@ def generate_plot(baseline_path, sample_path, output_path):
 
     # Create figure and plot
     fig, ax = plt.subplots(figsize=(8, 5))
-    ax.plot(base['cm-1'], base['A'], label=base_label, linewidth=1)
-    ax.plot(sample['cm-1'], sample['A'], label=sample_label, linewidth=1)
+    ax.plot(base['cm-1'], base['A'], label=base_label, linewidth=1, color = 'green')
+    ax.plot(sample['cm-1'], sample['A'], label=sample_label, linewidth=1, color = 'blue')
 
     # Axis labels
     plt.xlabel('cm-1')
