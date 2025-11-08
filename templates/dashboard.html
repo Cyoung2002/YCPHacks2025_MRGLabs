@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grease Analysis</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        header {
+            margin-bottom: 30px;
+        }
+        
+        .graph-container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #ccc;
+        }
+        
+        .graph-placeholder {
+            color: #666;
+            font-size: 18px;
+        }
+        
+        .input-section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .file-inputs {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .file-input-group {
+            text-align: center;
+        }
+        
+        .file-input-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .file-input-group input {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .process-btn {
+            padding: 12px 30px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .process-btn:hover {
+            background: #0056b3;
+        }
+        
+        .results-section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .color-comparison {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 20px 0;
+        }
+        
+        .color-box {
+            text-align: center;
+        }
+        
+        .color-swatch {
+            width: 80px;
+            height: 80px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            margin: 0 auto 10px;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .data-table th, .data-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        .data-table th {
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Grease Color Analysis</h1>
+            <p>Schneider Prize 2025 - Technology Innovation</p>
+        </header>
+        
+        <!-- Centered Graph Area -->
+
+
+         <!-- EDIT THE GRAPH PLACEHOLDER HERE TO BE REPLACED WITH THE GRAPH IMAGE-->
+        <div class="graph-container">
+            <div class="graph-placeholder">
+                📊 Graph will be displayed here<br>
+                <small>(Color analysis visualization)</small>
+            </div>
+        </div>
+        <!--LOOOK ABOVE-->
+        
+        <!-- File Input Section -->
+        <div class="input-section">
+            <h2>Upload Grease Sample Images</h2>
+            
+            <div class="file-inputs">
+                <div class="file-input-group">
+                    <label for="standardImage">Standard Grease Image:</label>
+                    <input type="file" id="standardImage" accept=".png,.jpg,.jpeg">
+                </div>
+                
+                <div class="file-input-group">
+                    <label for="testImage">Test Grease Image:</label>
+                    <input type="file" id="testImage" accept=".png,.jpg,.jpeg">
+                </div>
+            </div>
+            
+            <div class="file-inputs">
+                <div class="file-input-group">
+                    <label for="sampleId">Sample ID:</label>
+                    <input type="text" id="sampleId" placeholder="Enter sample ID (e.g., 12345)">
+                </div>
+            </div>
+            
+            <button class="process-btn" onclick="processImages()">
+                Analyze Images & Update Graph
+            </button>
+        </div>
+        
+        <!-- Results Section -->
+        <div class="results-section">
+            <h2>Analysis Results</h2>
+            
+            <div class="color-comparison">
+                <div class="color-box">
+                    <div class="color-swatch" id="standardColor"></div>
+                    <div><strong>Standard Grease</strong></div>
+                    <div id="standardRGB">RGB: --</div>
+                </div>
+                <div class="color-box">
+                    <div class="color-swatch" id="testColor"></div>
+                    <div><strong>Test Grease</strong></div>
+                    <div id="testRGB">RGB: --</div>
+                </div>
+            </div>
+            
+            {% if samples %}
+            <table class="data-table">
+                <tr>
+                    <th>Sample ID</th>
+                    <th>Standard RGB</th>
+                    <th>Test RGB</th>
+                    <th>Image File</th>
+                    <th>Timestamp</th>
+                </tr>
+                {% for sample in samples %}
+                <tr>
+                    <td>{{ sample.sample_id }}</td>
+                    <td>{{ sample.standard_rgb[0] }}, {{ sample.standard_rgb[1] }}, {{ sample.standard_rgb[2] }}</td>
+                    <td>{{ sample.test_rgb[0] }}, {{ sample.test_rgb[1] }}, {{ sample.test_rgb[2] }}</td>
+                    <td>{{ sample.image_filename }}</td>
+                    <td>{{ sample.timestamp }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+            <p>No data yet. Upload and analyze images to see results here!</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        function processImages() {
+            const standardFile = document.getElementById('standardImage').files[0];
+            const testFile = document.getElementById('testImage').files[0];
+            const sampleId = document.getElementById('sampleId').value;
+            
+            if (!standardFile || !testFile) {
+                alert('Please select both standard and test grease images!');
+                return;
+            }
+            
+            if (!sampleId) {
+                alert('Please enter a Sample ID!');
+                return;
+            }
+            
+            // For demo purposes - show some sample colors
+            document.getElementById('standardColor').style.backgroundColor = 'rgb(120, 80, 200)';
+            document.getElementById('testColor').style.backgroundColor = 'rgb(200, 150, 50)';
+            document.getElementById('standardRGB').textContent = 'RGB: 120, 80, 200';
+            document.getElementById('testRGB').textContent = 'RGB: 200, 150, 50';
+            
+            alert('Images uploaded! In the full version, this would:\n1. Send images to Python backend\n2. Analyze color data\n3. Update the graph with results\n4. Show real RGB values');
+            
+            // TODO: Connect to Python backend for actual processing
+            // This would send the files to your Flask API for analysis
+        }
+    </script>
+</body>
+</html>
