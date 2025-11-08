@@ -16,16 +16,12 @@ UPLOAD_FOLDER = 'Uploaded CSVs'
 ALLOWED_EXTENSIONS = {'csv'}
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = 16*1024*1024 #16 MB max
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB max
 
-
-os.makedirs(UPLOAD_FOLDER,exist_ok=True)
-
-
-
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.',1)[1].lower() in ALLOWED_EXTENSIONS
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/')
 def index():
@@ -45,18 +41,25 @@ def index():
     </html>
 '''
 
-@app.route('/')
+@app.route('/upload', methods=['POST'])
 def upload_file():
-    if'csvFile' not in request.files:
+    if 'csvFile' not in request.files:
         return 'No file part'
+    
     file = request.files['csvFile']
-    #check if exists
+    
+    # Check if exists
     if file.filename == '':
         return 'No selected file'
+    
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
-        filepath = os.path.join(app.config['UPLOAD_FOLDER',filename])
-        #checks if valid csv
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        
+        # Save the file first
+        file.save(filepath)
+        
+        # Then check if valid CSV
         try:
             df = pd.read_csv(filepath)
             return f'''
@@ -70,6 +73,7 @@ def upload_file():
             '''
         except Exception as e:
             return f'Error reading CSV: {str(e)}'
+    
     return 'Invalid file type'
 
 
