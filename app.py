@@ -6,14 +6,6 @@ app = Flask(__name__)
 # In-memory storage for demo (replace with database for real use)
 sample_data = []
 
-# Test data to display something on the page
-sample_data.append({
-    'sample_id': '12345',
-    'standard_rgb': [120, 80, 200],
-    'test_rgb': [200, 150, 50],
-    'image_filename': 'test.png',
-    'timestamp': '2024-01-20 14:30:00'
-})
 
 @app.route('/')
 def dashboard():
