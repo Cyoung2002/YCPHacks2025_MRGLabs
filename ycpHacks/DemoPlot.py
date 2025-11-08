@@ -1,6 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
+import io
 
 def create_demo_plot(baseline, sampleData):
 
@@ -12,9 +13,10 @@ def create_demo_plot(baseline, sampleData):
     base_label = os.path.splitext(os.path.basename(baseline))[0]
     sample_label = os.path.splitext(os.path.basename(sampleData))[0]
 
-    # Plotting the data from the csv, will need to dynamically pull the names from the files later
-    plt.plot(base['cm-1'], base['A'], label=base_label, linewidth=1)
-    plt.plot(sample['cm-1'], sample['A'], label=sample_label, linewidth=1)
+    # Create plot
+    fig, ax = plt.subplots(figsize=(8, 5))
+    ax.plot(base['cm-1'], base['A'], label=base_label, linewidth=1)
+    ax.plot(sample['cm-1'], sample['A'], label=sample_label, linewidth=1)
 
     # Axis labels
     plt.xlabel('cm-1')
@@ -29,4 +31,13 @@ def create_demo_plot(baseline, sampleData):
     )
 
     # Generating the plot
-    plt.show()
+    # plt.show()
+
+    # Save figure to an in-memory buffer
+    buffer = io.BytesIO()
+    fig.savefig(buffer, format='png', dpi=300, bbox_inches='tight')
+    plt.close(fig)
+    buffer.seek(0)  # rewind to start so it can be read
+
+    print(f"✅ Created plot for: {base_label} vs {sample_label}")
+    return buffer  # returns an in-memory PNG image object
