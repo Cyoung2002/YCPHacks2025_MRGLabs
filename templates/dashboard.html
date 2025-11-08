@@ -250,6 +250,72 @@
             font-size: 14px;
             color: #666;
         }
+        /* Selection and Graph Styles */
+.file-card.selected {
+    border-color: #007bff;
+    background: #f0f8ff;
+    box-shadow: 0 0 0 2px #007bff;
+}
+
+.checkbox-container {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+}
+
+.file-card {
+    position: relative;
+    padding-left: 45px;
+}
+
+.selected-file-card {
+    border: 2px solid #007bff;
+    background: #f0f8ff;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+}
+
+.selected-file-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.selected-file-name {
+    font-weight: bold;
+    color: #333;
+}
+
+.remove-selected {
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.btn-primary {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+}
+
+.btn-primary:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+}
         .btn-delete-all {
     background: #dc3545;
     color: white;
@@ -288,6 +354,7 @@
         </div>
         
         <!-- File Upload Section -->
+        
          <div class="input-section">
     <h2>Upload CSV Files</h2>
     <form id="uploadForm" enctype="multipart/form-data">
@@ -298,6 +365,24 @@
         </div>
         <button class="process-btn" type="submit" id="uploadButton">Upload CSV Files</button>
     </form>
+</div>
+<!-- Selected Files for Graph Section (Server-Side Storage) -->
+<div class="selected-files-section" style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 30px;">
+    <h2> Files Selected for Analysis</h2>
+    <div class="selected-count" id="selectedCount">Loading selected files...</div>
+    
+    <div class="selected-files-grid" id="selectedFilesGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; margin-top: 20px;">
+        <!-- Selected files will appear here -->
+    </div>
+    
+    <div class="analysis-actions" style="margin-top: 20px; text-align: center;">
+        <button class="process-btn" onclick="generateGraph()" id="generateGraphBtn">
+            Generate Graph from Selected Files
+        </button>
+        <button class="btn btn-delete" onclick="clearAllSelected()" id="clearSelectedBtn" style="margin-left: 10px;">
+            Clear All Selected (Server)
+        </button>
+    </div>
 </div>
         <!-- File Browsing Section-->
         <div class="file-browser">
@@ -319,14 +404,17 @@
     </div>
 
     <script>
-        // Handle form submission with AJAX
-        document.getElementById('uploadForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            uploadFiles();
-        });
+       // Global variable to track selected files (client-side for UI)
+let selectedFiles = new Set();
 
-        // AJAX file upload
-        function uploadFiles() {
+// Handle form submission with AJAX
+document.getElementById('uploadForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    uploadFiles();
+});
+
+// AJAX file upload
+function uploadFiles() {
     const fileInput = document.getElementById('csvInput');
     const messageField = document.getElementById('messageField');
     const uploadButton = document.getElementById('uploadButton');
@@ -392,141 +480,404 @@
         uploadButton.textContent = 'Upload CSV Files';
     });
 }
-        
-        // Show message in the message field
-        function showMessage(message, type) {
-            const messageField = document.getElementById('messageField');
-            messageField.textContent = message;
-            messageField.className = `message ${type}-message`;
-            messageField.style.display = 'block';
-        }
-        
-        // Clear errors when new file is selected
-        document.getElementById('csvInput').addEventListener('change', function() {
-            document.getElementById('messageField').style.display = 'none';
+
+// Show message in the message field
+function showMessage(message, type) {
+    const messageField = document.getElementById('messageField');
+    messageField.textContent = message;
+    messageField.className = `message ${type}-message`;
+    messageField.style.display = 'block';
+}
+
+// Clear errors when new file is selected
+document.getElementById('csvInput').addEventListener('change', function() {
+    document.getElementById('messageField').style.display = 'none';
+});
+
+// Load files on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadFiles();
+    loadSelectionState(); // Load server-side selection state
+});
+
+// Load files from server
+function loadFiles() {
+    fetch('/files-data')
+        .then(response => response.json())
+        .then(files => {
+            displayFiles(files);
+        })
+        .catch(error => {
+            console.error('Error loading files:', error);
+            document.getElementById('fileGrid').innerHTML = 
+                '<div class="no-files">Error loading files</div>';
         });
-        
-        // Load files on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            loadFiles();
-        });
-        
-        // Load files from server
-        function loadFiles() {
-            fetch('/files-data')
-                .then(response => response.json())
-                .then(files => {
-                    displayFiles(files);
-                })
-                .catch(error => {
-                    console.error('Error loading files:', error);
-                    document.getElementById('fileGrid').innerHTML = 
-                        '<div class="no-files">Error loading files</div>';
+}
+
+// Load selection state from server
+function loadSelectionState() {
+    fetch('/get-selected-files')
+        .then(response => response.json())
+        .then(data => {
+            if (data.selected_files) {
+                // Update client-side selection to match server
+                selectedFiles.clear();
+                data.selected_files.forEach(file => {
+                    selectedFiles.add(file.file_id);
                 });
-        }
-        
-        // Display files in the grid
-        function displayFiles(files) {
-            const fileGrid = document.getElementById('fileGrid');
-            const fileCount = document.getElementById('fileCount');
-            
-            if (files.length === 0) {
-                fileGrid.innerHTML = '<div class="no-files">No files uploaded yet</div>';
-                fileCount.textContent = 'No files';
-                return;
+                updateSelectedFilesDisplay(data.selected_files);
+                
+                // Update checkboxes in file browser
+                data.selected_files.forEach(file => {
+                    const checkbox = document.getElementById(`checkbox-${file.file_id}`);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                    }
+                    const card = document.getElementById(`card-${file.file_id}`);
+                    if (card) {
+                        card.classList.add('selected');
+                    }
+                });
             }
-            
-            fileCount.textContent = `${files.length} file${files.length !== 1 ? 's' : ''} found`;
-            
-            fileGrid.innerHTML = files.map(file => `
-                <div class="file-card" onclick="toggleExpand('${file.file_id}')" id="card-${file.file_id}">
-                    <div class="file-header">
-                        <div class="file-name" title="${file.original_name}">${file.original_name}</div>
-                        <div class="expand-icon">▼</div>
-                    </div>
-                    <div class="file-meta">
-                        Uploaded: ${new Date(file.upload_time).toLocaleString()}<br>
-                        Size: ${file.rows} rows × ${file.columns} columns<br>
-                        ID: ${file.file_id}
-                    </div>
-                    <div class="file-actions">
-                        <button class="btn btn-view" onclick="event.stopPropagation(); viewFile('${file.file_id}')">View</button>
-                        <a href="/download/${file.file_id}" class="btn btn-download" onclick="event.stopPropagation();">Download</a>
-                        <button class="btn btn-delete" onclick="event.stopPropagation(); deleteFile('${file.file_id}')">Delete</button>
-                    </div>
-                    <div class="file-preview" id="preview-${file.file_id}">
-                        <div style="text-align: center; color: #666; padding: 20px;">
-                            Loading preview...
-                        </div>
-                    </div>
+        })
+        .catch(error => {
+            console.error('Error loading selection state:', error);
+        });
+}
+
+// Display files in the grid
+// Display files in the grid with selected files at the top
+function displayFiles(files) {
+    const fileGrid = document.getElementById('fileGrid');
+    const fileCount = document.getElementById('fileCount');
+    
+    if (files.length === 0) {
+        fileGrid.innerHTML = '<div class="no-files">No files uploaded yet</div>';
+        fileCount.textContent = 'No files';
+        return;
+    }
+    
+    fileCount.textContent = `${files.length} file${files.length !== 1 ? 's' : ''} found`;
+    
+    // Sort files: selected files first, then by upload time
+    const sortedFiles = [...files].sort((a, b) => {
+        const aSelected = selectedFiles.has(a.file_id);
+        const bSelected = selectedFiles.has(b.file_id);
+        
+        if (aSelected && !bSelected) return -1; // a comes first
+        if (!aSelected && bSelected) return 1;  // b comes first
+        
+        // If both selected or both not selected, sort by upload time (newest first)
+        return new Date(b.upload_time) - new Date(a.upload_time);
+    });
+    
+    fileGrid.innerHTML = sortedFiles.map(file => `
+        <div class="file-card ${selectedFiles.has(file.file_id) ? 'selected' : ''}" 
+             onclick="toggleExpand('${file.file_id}')" 
+             id="card-${file.file_id}">
+            <div class="checkbox-container">
+                <input type="checkbox" 
+                       ${selectedFiles.has(file.file_id) ? 'checked' : ''}
+                       onchange="toggleFileSelection('${file.file_id}', this.checked)"
+                       onclick="event.stopPropagation();"
+                       id="checkbox-${file.file_id}">
+            </div>
+            <div class="file-header">
+                <div class="file-name" title="${file.original_name}">
+                    ${selectedFiles.has(file.file_id) ? '⭐ ' : ''}${file.original_name}
                 </div>
-            `).join('');
-        }
-        
-        // Toggle file card expansion
-        function toggleExpand(fileId) {
-            const card = document.getElementById(`card-${fileId}`);
-            const preview = document.getElementById(`preview-${fileId}`);
-            
-            if (card.classList.contains('expanded')) {
-                card.classList.remove('expanded');
+                <div class="expand-icon">▼</div>
+            </div>
+            <div class="file-meta">
+                Uploaded: ${new Date(file.upload_time).toLocaleString()}<br>
+                Size: ${file.rows} rows × ${file.columns} columns<br>
+                ID: ${file.file_id}
+            </div>
+            <div class="file-actions">
+                <button class="btn btn-view" onclick="event.stopPropagation(); viewFile('${file.file_id}')">View</button>
+                <a href="/download/${file.file_id}" class="btn btn-download" onclick="event.stopPropagation();">Download</a>
+                <button class="btn btn-delete" onclick="event.stopPropagation(); deleteFile('${file.file_id}')">Delete</button>
+            </div>
+            <div class="file-preview" id="preview-${file.file_id}">
+                <div style="text-align: center; color: #666; padding: 20px;">
+                    Loading preview...
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Toggle file selection (now communicates with server)
+function toggleFileSelection(fileId, isSelected) {
+    const endpoint = isSelected ? '/select-file' : '/deselect-file';
+    
+    fetch(`${endpoint}/${fileId}`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update client-side selection
+            if (isSelected) {
+                selectedFiles.add(fileId);
             } else {
-                card.classList.add('expanded');
-                // Load preview data if not already loaded
-                if (preview.innerHTML.includes('Loading preview')) {
-                    loadFilePreview(fileId);
-                }
+                selectedFiles.delete(fileId);
             }
-        }
-        
-        // Load file preview data
-        function loadFilePreview(fileId) {
-            fetch(`/file-preview/${fileId}`)
-                .then(response => response.text())
-                .then(html => {
-                    document.getElementById(`preview-${fileId}`).innerHTML = html;
-                })
-                .catch(error => {
-                    document.getElementById(`preview-${fileId}`).innerHTML = 
-                        '<div style="text-align: center; color: #dc3545; padding: 20px;">Error loading preview</div>';
-                });
-        }
-        
-        // Filter files based on search
-        function filterFiles() {
-            const searchTerm = document.getElementById('searchBar').value.toLowerCase();
-            const fileCards = document.querySelectorAll('.file-card');
-            let visibleCount = 0;
             
-            fileCards.forEach(card => {
-                const fileName = card.querySelector('.file-name').textContent.toLowerCase();
-                if (fileName.includes(searchTerm)) {
-                    card.style.display = 'block';
-                    visibleCount++;
-                } else {
-                    card.style.display = 'none';
-                }
+            // Update card appearance
+            const card = document.getElementById(`card-${fileId}`);
+            if (card) {
+                card.classList.toggle('selected', isSelected);
+            }
+            
+            // Reload the selection display from server
+            loadSelectionState();
+            
+            showMessage(data.message, 'success');
+        } else {
+            // Revert checkbox if failed
+            const checkbox = document.getElementById(`checkbox-${fileId}`);
+            if (checkbox) {
+                checkbox.checked = !isSelected;
+            }
+            showMessage(data.message, 'error');
+        }
+    })
+    .catch(error => {
+        // Revert checkbox on error
+        const checkbox = document.getElementById(`checkbox-${fileId}`);
+        if (checkbox) {
+            checkbox.checked = !isSelected;
+        }
+        showMessage('Error updating selection', 'error');
+    });
+}
+
+// Update the selected files display
+function updateSelectedFilesDisplay(selectedFilesData) {
+    const selectedCount = document.getElementById('selectedCount');
+    const selectedFilesGrid = document.getElementById('selectedFilesGrid');
+    const generateGraphBtn = document.getElementById('generateGraphBtn');
+    const clearSelectedBtn = document.getElementById('clearSelectedBtn');
+    
+    if (!selectedFilesData || selectedFilesData.length === 0) {
+        selectedCount.textContent = 'No files selected for analysis';
+        selectedFilesGrid.innerHTML = '';
+        generateGraphBtn.disabled = true;
+        return;
+    }
+    
+    selectedCount.textContent = `${selectedFilesData.length} file${selectedFilesData.length !== 1 ? 's' : ''} selected for analysis (stored in Flask)`;
+    generateGraphBtn.disabled = false;
+    
+    selectedFilesGrid.innerHTML = selectedFilesData.map(file => `
+        <div class="selected-file-card">
+            <div class="selected-file-header">
+                <div class="selected-file-name">${file.original_name}</div>
+                <button class="remove-selected" onclick="removeFromSelected('${file.file_id}')">×</button>
+            </div>
+            <div class="file-meta">
+                Rows: ${file.rows} | Columns: ${file.columns}<br>
+                ID: ${file.file_id}<br>
+                <small>Uploaded: ${new Date(file.upload_time).toLocaleString()}</small>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Remove file from selected (server-side)
+function removeFromSelected(fileId) {
+    fetch(`/deselect-file/${fileId}`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update client-side
+            selectedFiles.delete(fileId);
+            
+            // Update checkbox
+            const checkbox = document.getElementById(`checkbox-${fileId}`);
+            if (checkbox) {
+                checkbox.checked = false;
+            }
+            
+            // Update card appearance
+            const card = document.getElementById(`card-${fileId}`);
+            if (card) {
+                card.classList.remove('selected');
+            }
+            
+            loadSelectionState();
+            showMessage(data.message, 'success');
+        } else {
+            showMessage(data.message, 'error');
+        }
+    })
+    .catch(error => {
+        showMessage('Error removing file from selection', 'error');
+    });
+}
+
+// Clear all selected files (server-side)
+function clearAllSelected() {
+    fetch('/clear-selection', {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update client-side
+            selectedFiles.clear();
+            
+            // Uncheck all checkboxes
+            document.querySelectorAll('.file-card input[type="checkbox"]').forEach(checkbox => {
+                checkbox.checked = false;
             });
             
-            document.getElementById('fileCount').textContent = 
-                `${visibleCount} file${visibleCount !== 1 ? 's' : ''} found`;
+            // Remove selected class from all cards
+            document.querySelectorAll('.file-card.selected').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            loadSelectionState();
+            showMessage(data.message, 'success');
+        } else {
+            showMessage(data.message, 'error');
         }
-        
-        // Delete file with confirmation
-        function deleteFile(fileId) {
-            if (confirm('Are you sure you want to delete this file?')) {
-                fetch(`/delete/${fileId}`)
-                    .then(response => response.text())
-                    .then(result => {
-                        showMessage('File deleted successfully', 'success');
-                        loadFiles(); // Reload the file list
-                    })
-                    .catch(error => {
-                        showMessage('Error deleting file', 'error');
-                    });
-            }
+    })
+    .catch(error => {
+        showMessage('Error clearing selection', 'error');
+    });
+}
+
+// Generate graph from selected files
+function generateGraph() {
+    const generateGraphBtn = document.getElementById('generateGraphBtn');
+    generateGraphBtn.disabled = true;
+    generateGraphBtn.textContent = 'Generating Graph...';
+    
+    showMessage('Generating graph from selected files...', 'success');
+    
+    fetch('/generate-graph', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
         }
-        // Delete all files with confirmation
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            displayGraph(data);
+            showMessage('Graph generated successfully!', 'success');
+        } else {
+            showMessage(`Graph generation failed: ${data.message}`, 'error');
+        }
+    })
+    .catch(error => {
+        showMessage(`Error generating graph: ${error.message}`, 'error');
+    })
+    .finally(() => {
+        generateGraphBtn.disabled = false;
+        generateGraphBtn.textContent = 'Generate Graph from Selected Files';
+    });
+}
+
+// Display the generated graph
+function displayGraph(graphData) {
+    const graphContainer = document.querySelector('.graph-container');
+    
+    if (graphData.html) {
+        graphContainer.innerHTML = graphData.html;
+    } else {
+        graphContainer.innerHTML = `
+            <div style="width: 100%; text-align: center;">
+                <h3>Analysis Results</h3>
+                <p>Generated from server-side selected files</p>
+                <div style="background: #f8f9fa; padding: 40px; border-radius: 10px;">
+                    <p><em>Graph visualization would be displayed here</em></p>
+                </div>
+            </div>
+        `;
+    }
+}
+
+// The rest of your existing functions (toggleExpand, loadFilePreview, filterFiles, deleteFile, deleteAllFiles, viewFile) remain the same
+// Toggle file card expansion
+function toggleExpand(fileId) {
+    const card = document.getElementById(`card-${fileId}`);
+    const preview = document.getElementById(`preview-${fileId}`);
+    
+    if (card.classList.contains('expanded')) {
+        card.classList.remove('expanded');
+    } else {
+        card.classList.add('expanded');
+        // Load preview data if not already loaded
+        if (preview.innerHTML.includes('Loading preview')) {
+            loadFilePreview(fileId);
+        }
+    }
+}
+
+// Load file preview data
+function loadFilePreview(fileId) {
+    fetch(`/file-preview/${fileId}`)
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById(`preview-${fileId}`).innerHTML = html;
+        })
+        .catch(error => {
+            document.getElementById(`preview-${fileId}`).innerHTML = 
+                '<div style="text-align: center; color: #dc3545; padding: 20px;">Error loading preview</div>';
+        });
+}
+
+// Filter files based on search
+function filterFiles() {
+    const searchTerm = document.getElementById('searchBar').value.toLowerCase();
+    const fileCards = document.querySelectorAll('.file-card');
+    let visibleCount = 0;
+    
+    fileCards.forEach(card => {
+        const fileName = card.querySelector('.file-name').textContent.toLowerCase();
+        if (fileName.includes(searchTerm)) {
+            card.style.display = 'block';
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    
+    document.getElementById('fileCount').textContent = 
+        `${visibleCount} file${visibleCount !== 1 ? 's' : ''} found`;
+    
+    // Re-sort the displayed files to maintain selection order
+    if (searchTerm === '') {
+        loadFiles();
+    }
+}
+
+// Delete file with confirmation
+function deleteFile(fileId) {
+    if (confirm('Are you sure you want to delete this file?')) {
+        fetch(`/delete/${fileId}`)
+            .then(response => response.text())
+            .then(result => {
+                showMessage('File deleted successfully', 'success');
+                // Also remove from server selection if it was selected
+                if (selectedFiles.has(fileId)) {
+                    fetch(`/deselect-file/${fileId}`, { method: 'POST' });
+                }
+                loadFiles(); // Reload the file list
+                loadSelectionState(); // Reload selection state
+            })
+            .catch(error => {
+                showMessage('Error deleting file', 'error');
+            });
+    }
+}
+
+// Delete all files with confirmation
 function deleteAllFiles() {
     const fileCount = document.querySelectorAll('.file-card').length;
     
@@ -551,7 +902,11 @@ function deleteAllFiles() {
         })
         .then(result => {
             showMessage(`Successfully deleted all ${fileCount} files`, 'success');
+            // Clear server selection since all files are deleted
+            fetch('/clear-selection', { method: 'POST' });
+            selectedFiles.clear();
             loadFiles(); // Refresh the file list
+            loadSelectionState(); // Refresh selection state
         })
         .catch(error => {
             showMessage(`Error deleting all files: ${error.message}`, 'error');
@@ -563,31 +918,10 @@ function deleteAllFiles() {
     }
 }
 
-// Update the loadFiles function to hide delete all button when no files
-function loadFiles() {
-    fetch('/files-data')
-        .then(response => response.json())
-        .then(files => {
-            displayFiles(files);
-            // Show/hide delete all button based on whether there are files
-            const deleteAllButton = document.getElementById('deleteAllButton');
-            if (files.length === 0) {
-                deleteAllButton.style.display = 'none';
-            } else {
-                deleteAllButton.style.display = 'block';
-            }
-        })
-        .catch(error => {
-            console.error('Error loading files:', error);
-            document.getElementById('fileGrid').innerHTML = 
-                '<div class="no-files">Error loading files</div>';
-            document.getElementById('deleteAllButton').style.display = 'none';
-        });
+// View file (same as expand)
+function viewFile(fileId) {
+    toggleExpand(fileId);
 }
-        // View file (same as expand)
-        function viewFile(fileId) {
-            toggleExpand(fileId);
-        }
     </script>
 </body>
 </html>

@@ -11,7 +11,6 @@ from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 
-
 sample_data = []
 
 #-----------------Database Setup for CSV Files----------
@@ -22,7 +21,7 @@ DATABASE = 'file_registry.db'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB max
 app.config['DATABASE'] = DATABASE
-
+selected_graph_files = set()
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # Database setup functions
@@ -172,33 +171,17 @@ def upload_file():
                 if os.path.exists(filepath):
                     os.remove(filepath)
     
-        if success_count == 0:
-            return jsonify({
-                'success': False, 
-                'message': f'No files uploaded. Errors: {"; ".join(error_files)}'
-            }), 400
-        
+    if success_count == 0:
         return jsonify({
-            'success': True,
-            'message': f'Successfully uploaded {success_count} file(s)',
-            'count': success_count
-        })
+            'success': False, 
+            'message': f'No files uploaded. Errors: {"; ".join(error_files)}'
+        }), 400
     
-    # Return results
-    if success_count == 0 and not error_files:
-        return 'No valid files uploaded', 400
-    
-    result_html = f'<h2>Upload Complete!</h2><p>Successfully uploaded: {success_count} files</p>'
-    
-    if error_files:
-        result_html += f'<h3>Errors ({len(error_files)} files):</h3><ul>'
-        for error in error_files:
-            result_html += f'<li>{error}</li>'
-        result_html += '</ul>'
-    
-    result_html += '<div style="margin-top: 20px;"><a href="/">Upload more files</a> | <a href="/files">View all files</a></div>'
-    
-    return result_html
+    return jsonify({
+        'success': True,
+        'message': f'Successfully uploaded {success_count} file(s)',
+        'count': success_count
+    })
 
 @app.route('/files')
 def list_files():
@@ -274,6 +257,10 @@ def delete_file(file_id):
         db.execute('DELETE FROM files WHERE file_id = ?', (file_id,))
         db.commit()
         
+        # Also remove from selected files if it was selected
+        if file_id in selected_graph_files:
+            selected_graph_files.remove(file_id)
+        
         return f'File {file_id} deleted successfully'
     except Exception as e:
         return f'Error deleting file: {str(e)}', 500
@@ -296,6 +283,160 @@ def download_file(file_id):
         return f'Error downloading file: {str(e)}', 500
 
 #----------------------------------------------------------------------
+
+#----------------- File Selection Routes for Graphing ----------------
+@app.route('/select-file/<file_id>', methods=['POST'])
+def select_file(file_id):
+    """Add a file to the graph selection"""
+    try:
+        # Verify file exists
+        db = get_db()
+        file_record = db.execute(
+            'SELECT * FROM files WHERE file_id = ?', (file_id,)
+        ).fetchone()
+        
+        if not file_record:
+            return jsonify({'success': False, 'message': 'File not found'}), 404
+        
+        selected_graph_files.add(file_record)
+        
+        return jsonify({
+            'success': True, 
+            'message': f"File '{file_record['original_name']}' added to graph selection",
+            'selected_count': len(selected_graph_files)
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/deselect-file/<file_id>', methods=['POST'])
+def deselect_file(file_id):
+    """Remove a file from the graph selection"""
+    try:
+        if file_id in selected_graph_files:
+            selected_graph_files.remove(file_id)
+            
+        return jsonify({
+            'success': True, 
+            'message': 'File removed from graph selection',
+            'selected_count': len(selected_graph_files)
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/clear-selection', methods=['POST'])
+def clear_selection():
+    """Clear all files from graph selection"""
+    try:
+        selected_graph_files.clear()
+        return jsonify({
+            'success': True, 
+            'message': 'All files cleared from graph selection'
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/get-selected-files')
+def get_selected_files():
+    """Get all currently selected files for graphing"""
+    try:
+        db = get_db()
+        selected_files_data = []
+        
+        for file_id in selected_graph_files:
+            file_record = db.execute(
+                'SELECT * FROM files WHERE file_id = ?', (file_id,)
+            ).fetchone()
+            
+            if file_record:
+                selected_files_data.append({
+                    'file_id': file_record['file_id'],
+                    'original_name': file_record['original_name'],
+                    'upload_time': file_record['upload_time'],
+                    'rows': file_record['rows'],
+                    'columns': file_record['columns'],
+                    'column_names': file_record['column_names']
+                })
+        
+        return jsonify({
+            'selected_files': selected_files_data,
+            'count': len(selected_files_data)
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@app.route('/generate-graph', methods=['POST'])
+def generate_graph():
+    """Generate graph from selected files"""
+    try:
+        if not selected_graph_files:
+            return jsonify({'success': False, 'message': 'No files selected for graphing'})
+        
+        db = get_db()
+        selected_files_data = []
+        
+        # Get detailed information for selected files
+        for file_id in selected_graph_files:
+            file_record = db.execute(
+                'SELECT * FROM files WHERE file_id = ?', (file_id,)
+            ).fetchone()
+            
+            if file_record:
+                selected_files_data.append({
+                    'file_id': file_record['file_id'],
+                    'original_name': file_record['original_name'],
+                    'rows': file_record['rows'],
+                    'columns': file_record['columns'],
+                    'column_names': file_record['column_names'].split(',') if file_record['column_names'] else []
+                })
+        
+        # Your actual graph generation logic would go here
+        graph_html = f'''
+        <div style="width: 100%; text-align: center;">
+            <h3> Graph Analysis</h3>
+            <p>Generated from {len(selected_files_data)} selected file(s)</p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin: 20px 0;">
+        '''
+        
+        for file_info in selected_files_data:
+            graph_html += f'''
+                <div style="border: 2px solid #007bff; padding: 15px; border-radius: 8px; background: #f0f8ff;">
+                    <strong>📄 {file_info["original_name"]}</strong><br>
+                    <small>ID: {file_info["file_id"]}</small><br>
+                    <small>Size: {file_info["rows"]} × {file_info["columns"]}</small><br>
+                    <small>Columns: {", ".join(file_info["column_names"][:3])}{"..." if len(file_info["column_names"]) > 3 else ""}</small>
+                </div>
+            '''
+        
+        graph_html += '''
+            </div>
+            
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px; border-radius: 10px; margin-top: 20px;">
+                <h4>Graph Visualization Area</h4>
+                <p><em>Your actual graph would be generated here</em></p>
+                <p>Selected files are stored separately in Flask memory</p>
+                <div style="margin-top: 20px;">
+                    <button class="process-btn" style="background: white; color: #667eea; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;" onclick="alert('Export functionality would be implemented here')">
+                        Export Graph
+                    </button>
+                </div>
+            </div>
+        </div>
+        '''
+        
+        return jsonify({
+            'success': True,
+            'message': f'Graph generated from {len(selected_files_data)} files',
+            'html': graph_html,
+            'selected_files': selected_files_data
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Error generating graph: {str(e)}'})
 
 #----------------- MRG Schneider Prize Routes----------
 @app.route('/mrg-schneider-prize')
@@ -324,8 +465,6 @@ def upload_data():
 def get_samples():
     """API endpoint to get all sample data (optional, for JavaScript)"""
     return jsonify(sample_data)
-
-# Add these routes to your Flask app
 
 @app.route('/files-data')
 def files_data():
@@ -365,8 +504,6 @@ def file_preview(file_id):
         return df.head(10).to_html(classes='preview-table', index=False, escape=False)
     except Exception as e:
         return f'<div style="text-align: center; color: #dc3545;">Error loading preview: {str(e)}</div>'
-    
-
 
 @app.route('/delete-all', methods=['POST'])
 def delete_all_files():
@@ -393,6 +530,9 @@ def delete_all_files():
         db.execute('DELETE FROM files')
         db.commit()
         
+        # Clear the selected files set since all files are deleted
+        selected_graph_files.clear()
+        
         if errors:
             return f'Deleted {deleted_count} files, but encountered errors: {"; ".join(errors)}', 500
         
@@ -400,10 +540,32 @@ def delete_all_files():
         
     except Exception as e:
         return f'Error deleting all files: {str(e)}', 500
-    
 
 if __name__ == '__main__':
     print("Starting Schneider Prize Demo...")
     print("CSV Upload Page: http://localhost:5000/")
     print("Main Webpage: http://localhost:5000/mrg-schneider-prize")
     app.run(host='0.0.0.0', port=5000, debug=True)
+
+
+
+@app.route('/get-filename/<file_id>')
+def get_filename(file_id):
+    """Get the original filename for a specific file_id"""
+    try:
+        db = get_db()
+        file_record = db.execute(
+            'SELECT original_name FROM files WHERE file_id = ?', (file_id,)
+        ).fetchone()
+        
+        if not file_record:
+            return jsonify({'success': False, 'message': 'File not found'}), 404
+        
+        return jsonify({
+            'success': True,
+            'file_id': file_id,
+            'original_name': file_record['original_name']
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
