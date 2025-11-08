@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grease Analysis</title>
+    <title>Schneider Project YCP Hacks</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static',filename='favicon.ico')}}">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,172 +14,914 @@
         }
         
         .container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
         }
         
         header {
+            margin-bottom: 30px;
             text-align: center;
+        }
+        
+        .graph-container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #ccc;
+        }
+        
+        .graph-placeholder {
+            color: #666;
+            font-size: 18px;
+        }
+        
+        .input-section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .process-btn {
+            padding: 12px 30px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .process-btn:hover {
+            background: #0056b3;
+        }
+        
+        .process-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .error-message {
+            background-color: #ffe6e6;
+            color: #dc3545;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .success-message {
+            background-color: #e6ffe6;
+            color: #28a745;
+            border: 1px solid #c3e6cb;
+        }
+        
+        /* File Browser Styles */
+        .file-browser {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             margin-bottom: 30px;
         }
         
-        .main-content {
-            display: flex;
-            gap: 20px;
-        }
-        
-        .section {
-            flex: 1;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        
-        .section-title {
-            margin-top: 0;
-            color: #333;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
-        }
-        
-        .input-group {
-            margin-bottom: 15px;
-        }
-        
-        .input-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        
-        .input-group input {
+        .search-bar {
             width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
             font-size: 16px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
         }
         
-        .color-display {
-            display: flex;
-            gap: 20px;
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
             margin-top: 20px;
         }
         
-        .color-box {
+        .file-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            background: #fafafa;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .file-card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .file-card.expanded {
+            grid-column: 1 / -1;
+            background: #f8f9fa;
+            border-color: #007bff;
+        }
+        
+        .file-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        
+        .file-name {
+            font-weight: bold;
+            color: #333;
+            word-break: break-word;
             flex: 1;
+            margin-right: 10px;
+        }
+        
+        .file-meta {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .file-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            text-decoration: none;
+            display: inline-block;
             text-align: center;
         }
         
-        .color-swatch {
-            width: 100px;
-            height: 100px;
-            border: 2px solid #333;
-            border-radius: 8px;
-            margin: 0 auto 10px;
+        .btn-view {
+            background: #28a745;
+            color: white;
         }
         
-        .data-table {
+        .btn-download {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+        }
+        
+        .file-preview {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            margin-top: 15px;
+        }
+        
+        .file-card.expanded .file-preview {
+            max-height: 400px;
+        }
+        
+        .preview-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            font-size: 12px;
+            background: white;
         }
         
-        .data-table th, .data-table td {
+        .preview-table th,
+        .preview-table td {
             border: 1px solid #ddd;
-            padding: 8px;
+            padding: 6px;
             text-align: left;
         }
         
-        .data-table th {
-            background-color: #f5f5f5;
+        .preview-table th {
+            background: #f8f9fa;
+            font-weight: bold;
         }
+        
+        .expand-icon {
+            font-size: 18px;
+            color: #666;
+            transition: transform 0.3s ease;
+        }
+        
+        .file-card.expanded .expand-icon {
+            transform: rotate(180deg);
+            color: #007bff;
+        }
+        
+        .no-files {
+            text-align: center;
+            color: #666;
+            padding: 40px;
+            grid-column: 1 / -1;
+        }
+        
+        .file-count {
+            color: #666;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        
+        .upload-progress {
+            margin: 10px 0;
+            font-size: 14px;
+            color: #666;
+        }
+        /* Selection and Graph Styles */
+.file-card.selected {
+    border-color: #007bff;
+    background: #f0f8ff;
+    box-shadow: 0 0 0 2px #007bff;
+}
+
+.checkbox-container {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+}
+
+.file-card {
+    position: relative;
+    padding-left: 45px;
+}
+
+.selected-file-card {
+    border: 2px solid #007bff;
+    background: #f0f8ff;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+}
+
+.selected-file-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.selected-file-name {
+    font-weight: bold;
+    color: #333;
+}
+
+.remove-selected {
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.btn-primary {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+}
+
+.btn-primary:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+}
+        .btn-delete-all {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-delete-all:hover {
+    background: #c82333;
+}
+
+.btn-delete-all:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+}
     </style>
 </head>
+   
 <body>
     <div class="container">
         <header>
-            <h1>Grease Color Analysis</h1>
-            <p>Upload and analyze grease sample images</p>
+            <h1>Schneider Project 2025</h1>
+            <p>Schneider Prize 2025 - Technology Innovation</p>
         </header>
         
-        <div class="main-content">
-            <!-- Left Section: Input Controls -->
-            <div class="section">
-                <h2 class="section-title">Image Processing</h2>
-                
-                <div class="input-group">
-                    <label for="sampleId">Sample ID:</label>
-                    <input type="text" id="sampleId" placeholder="Enter sample ID (e.g., 12345)">
-                </div>
-                
-                <div class="input-group">
-                    <label for="imageUpload">Upload Image:</label>
-                    <input type="file" id="imageUpload" accept=".png,.jpg,.jpeg">
-                </div>
-                
-                <button onclick="processImage()" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                    Process Image
-                </button>
-                
-                <div class="color-display">
-                    <div class="color-box">
-                        <div class="color-swatch" id="standardColor" style="background-color: #7846a3;"></div>
-                        <div>Standard Grease</div>
-                    </div>
-                    <div class="color-box">
-                        <div class="color-swatch" id="testColor" style="background-color: #c89632;"></div>
-                        <div>Test Grease</div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Right Section: Results Display -->
-            <div class="section">
-                <h2 class="section-title">Analysis Results</h2>
-                
-                <table class="data-table">
-                    <tr>
-                        <th>Sample ID</th>
-                        <th>Standard RGB</th>
-                        <th>Test RGB</th>
-                        <th>Status</th>
-                    </tr>
-                    <tr>
-                        <td>12345</td>
-                        <td>120, 80, 200</td>
-                        <td>200, 150, 50</td>
-                        <td>Processed</td>
-                    </tr>
-                </table>
-                
-                <div style="margin-top: 20px;">
-                    <h3>Processed Data:</h3>
-                    <div id="results">
-                        <p>Sample ID: <span id="displaySampleId">-</span></p>
-                        <p>Standard RGB: <span id="displayStandardRGB">-</span></p>
-                        <p>Test RGB: <span id="displayTestRGB">-</span></p>
-                        <p>Image: <span id="displayImage">-</span></p>
-                    </div>
-                </div>
+        <!-- Centered Graph Area -->
+        <div class="graph-container">
+            <div class="graph-placeholder">
+                 Graph will be displayed here<br>
+                <small>(Color analysis visualization)</small>
             </div>
         </div>
+        
+        <!-- File Upload Section -->
+        
+         <div class="input-section">
+    <h2>Upload CSV Files</h2>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <div>
+            <input type="file" id="csvInput" name="csvFile" accept=".csv" multiple required>
+            <div id="messageField" class="message"></div>
+            <div id="uploadProgress" class="upload-progress"></div>
+        </div>
+        <button class="process-btn" type="submit" id="uploadButton">Upload CSV Files</button>
+    </form>
+</div>
+<!-- Selected Files for Graph Section (Server-Side Storage) -->
+<div class="selected-files-section" style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 30px;">
+    <h2> Files Selected for Analysis</h2>
+    <div class="selected-count" id="selectedCount">Loading selected files...</div>
+    
+    <div class="selected-files-grid" id="selectedFilesGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; margin-top: 20px;">
+        <!-- Selected files will appear here -->
+    </div>
+    
+    <div class="analysis-actions" style="margin-top: 20px; text-align: center;">
+        <button class="process-btn" onclick="generateGraph()" id="generateGraphBtn">
+            Generate Graph from Selected Files
+        </button>
+        <button class="btn btn-delete" onclick="clearAllSelected()" id="clearSelectedBtn" style="margin-left: 10px;">
+            Clear All Selected (Server)
+        </button>
+    </div>
+</div>
+        <!-- File Browsing Section-->
+        <div class="file-browser">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="margin: 0;">File Browser</h2>
+        <button class="btn-delete-all" onclick="deleteAllFiles()" id="deleteAllButton">
+            Delete All Files
+        </button>
+    </div>
+    
+    <input type="text" id="searchBar" class="search-bar" placeholder="Search files by name..." onkeyup="filterFiles()">
+    <div class="file-count" id="fileCount">Loading files...</div>
+    
+    <div class="file-grid" id="fileGrid">
+        <!-- Files will be loaded here dynamically -->
+    </div>
+</div>
+        
     </div>
 
     <script>
-        function processImage() {
-            // This will be connected to your Python backend later
-            const sampleId = document.getElementById('sampleId').value;
-            
-            // For now, just display the input values
-            document.getElementById('displaySampleId').textContent = sampleId || '12345';
-            document.getElementById('displayStandardRGB').textContent = '120, 80, 200';
-            document.getElementById('displayTestRGB').textContent = '200, 150, 50';
-            document.getElementById('displayImage').textContent = sampleId ? sampleId + '.png' : '12345.png';
-            
-            alert('Image processing would happen here! Connected to Python backend.');
+       // Global variable to track selected files (client-side for UI)
+let selectedFiles = new Set();
+
+// Handle form submission with AJAX
+document.getElementById('uploadForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    uploadFiles();
+});
+
+// AJAX file upload
+function uploadFiles() {
+    const fileInput = document.getElementById('csvInput');
+    const messageField = document.getElementById('messageField');
+    const uploadButton = document.getElementById('uploadButton');
+    const progressField = document.getElementById('uploadProgress');
+    
+    // Clear previous messages
+    messageField.style.display = 'none';
+    messageField.className = 'message';
+    progressField.textContent = '';
+    
+    // Validate files
+    if (!fileInput.files || fileInput.files.length === 0) {
+        showMessage('Please select at least one CSV file', 'error');
+        return;
+    }
+    
+    // Check file types
+    for (let file of fileInput.files) {
+        if (!file.name.toLowerCase().endsWith('.csv')) {
+            showMessage('Please upload only CSV files', 'error');
+            return;
         }
+    }
+    
+    // Disable upload button and show progress
+    uploadButton.disabled = true;
+    uploadButton.textContent = 'Uploading...';
+    progressField.textContent = `Uploading ${fileInput.files.length} file(s)...`;
+    
+    // Create FormData and send AJAX request
+    const formData = new FormData();
+    for (let file of fileInput.files) {
+        formData.append('csvFile', file);
+    }
+    
+    fetch('/upload', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showMessage(data.message, 'success');
+            progressField.textContent = 'Upload complete!';
+            
+            // Clear file input
+            fileInput.value = '';
+            
+            // Refresh file browser
+            loadFiles();
+        } else {
+            showMessage(data.message, 'error');
+            progressField.textContent = 'Upload failed';
+        }
+    })
+    .catch(error => {
+        showMessage(`Upload failed: ${error.message}`, 'error');
+        progressField.textContent = 'Upload failed';
+    })
+    .finally(() => {
+        // Re-enable upload button
+        uploadButton.disabled = false;
+        uploadButton.textContent = 'Upload CSV Files';
+    });
+}
+
+// Show message in the message field
+function showMessage(message, type) {
+    const messageField = document.getElementById('messageField');
+    messageField.textContent = message;
+    messageField.className = `message ${type}-message`;
+    messageField.style.display = 'block';
+}
+
+// Clear errors when new file is selected
+document.getElementById('csvInput').addEventListener('change', function() {
+    document.getElementById('messageField').style.display = 'none';
+});
+
+// Load files on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadFiles();
+    loadSelectionState(); // Load server-side selection state
+});
+
+// Load files from server
+function loadFiles() {
+    fetch('/files-data')
+        .then(response => response.json())
+        .then(files => {
+            displayFiles(files);
+        })
+        .catch(error => {
+            console.error('Error loading files:', error);
+            document.getElementById('fileGrid').innerHTML = 
+                '<div class="no-files">Error loading files</div>';
+        });
+}
+
+// Load selection state from server
+function loadSelectionState() {
+    fetch('/get-selected-files')
+        .then(response => response.json())
+        .then(data => {
+            if (data.selected_files) {
+                // Update client-side selection to match server
+                selectedFiles.clear();
+                data.selected_files.forEach(file => {
+                    selectedFiles.add(file.file_id);
+                });
+                updateSelectedFilesDisplay(data.selected_files);
+                
+                // Update checkboxes in file browser
+                data.selected_files.forEach(file => {
+                    const checkbox = document.getElementById(`checkbox-${file.file_id}`);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                    }
+                    const card = document.getElementById(`card-${file.file_id}`);
+                    if (card) {
+                        card.classList.add('selected');
+                    }
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error loading selection state:', error);
+        });
+}
+
+// Display files in the grid
+// Display files in the grid with selected files at the top
+function displayFiles(files) {
+    const fileGrid = document.getElementById('fileGrid');
+    const fileCount = document.getElementById('fileCount');
+    
+    if (files.length === 0) {
+        fileGrid.innerHTML = '<div class="no-files">No files uploaded yet</div>';
+        fileCount.textContent = 'No files';
+        return;
+    }
+    
+    fileCount.textContent = `${files.length} file${files.length !== 1 ? 's' : ''} found`;
+    
+    // Sort files: selected files first, then by upload time
+    const sortedFiles = [...files].sort((a, b) => {
+        const aSelected = selectedFiles.has(a.file_id);
+        const bSelected = selectedFiles.has(b.file_id);
+        
+        if (aSelected && !bSelected) return -1; // a comes first
+        if (!aSelected && bSelected) return 1;  // b comes first
+        
+        // If both selected or both not selected, sort by upload time (newest first)
+        return new Date(b.upload_time) - new Date(a.upload_time);
+    });
+    
+    fileGrid.innerHTML = sortedFiles.map(file => `
+        <div class="file-card ${selectedFiles.has(file.file_id) ? 'selected' : ''}" 
+             onclick="toggleExpand('${file.file_id}')" 
+             id="card-${file.file_id}">
+            <div class="checkbox-container">
+                <input type="checkbox" 
+                       ${selectedFiles.has(file.file_id) ? 'checked' : ''}
+                       onchange="toggleFileSelection('${file.file_id}', this.checked)"
+                       onclick="event.stopPropagation();"
+                       id="checkbox-${file.file_id}">
+            </div>
+            <div class="file-header">
+                <div class="file-name" title="${file.original_name}">
+                    ${selectedFiles.has(file.file_id) ? '⭐ ' : ''}${file.original_name}
+                </div>
+                <div class="expand-icon">▼</div>
+            </div>
+            <div class="file-meta">
+                Uploaded: ${new Date(file.upload_time).toLocaleString()}<br>
+                Size: ${file.rows} rows × ${file.columns} columns<br>
+                ID: ${file.file_id}
+            </div>
+            <div class="file-actions">
+                <button class="btn btn-view" onclick="event.stopPropagation(); viewFile('${file.file_id}')">View</button>
+                <a href="/download/${file.file_id}" class="btn btn-download" onclick="event.stopPropagation();">Download</a>
+                <button class="btn btn-delete" onclick="event.stopPropagation(); deleteFile('${file.file_id}')">Delete</button>
+            </div>
+            <div class="file-preview" id="preview-${file.file_id}">
+                <div style="text-align: center; color: #666; padding: 20px;">
+                    Loading preview...
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Toggle file selection (now communicates with server)
+function toggleFileSelection(fileId, isSelected) {
+    const endpoint = isSelected ? '/select-file' : '/deselect-file';
+    
+    fetch(`${endpoint}/${fileId}`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update client-side selection
+            if (isSelected) {
+                selectedFiles.add(fileId);
+            } else {
+                selectedFiles.delete(fileId);
+            }
+            
+            // Update card appearance
+            const card = document.getElementById(`card-${fileId}`);
+            if (card) {
+                card.classList.toggle('selected', isSelected);
+            }
+            
+            // Reload the selection display from server
+            loadSelectionState();
+            
+            showMessage(data.message, 'success');
+        } else {
+            // Revert checkbox if failed
+            const checkbox = document.getElementById(`checkbox-${fileId}`);
+            if (checkbox) {
+                checkbox.checked = !isSelected;
+            }
+            showMessage(data.message, 'error');
+        }
+    })
+    .catch(error => {
+        // Revert checkbox on error
+        const checkbox = document.getElementById(`checkbox-${fileId}`);
+        if (checkbox) {
+            checkbox.checked = !isSelected;
+        }
+        showMessage('Error updating selection', 'error');
+    });
+}
+
+// Update the selected files display
+function updateSelectedFilesDisplay(selectedFilesData) {
+    const selectedCount = document.getElementById('selectedCount');
+    const selectedFilesGrid = document.getElementById('selectedFilesGrid');
+    const generateGraphBtn = document.getElementById('generateGraphBtn');
+    const clearSelectedBtn = document.getElementById('clearSelectedBtn');
+    
+    if (!selectedFilesData || selectedFilesData.length === 0) {
+        selectedCount.textContent = 'No files selected for analysis';
+        selectedFilesGrid.innerHTML = '';
+        generateGraphBtn.disabled = true;
+        return;
+    }
+    
+    selectedCount.textContent = `${selectedFilesData.length} file${selectedFilesData.length !== 1 ? 's' : ''} selected for analysis (stored in Flask)`;
+    generateGraphBtn.disabled = false;
+    
+    selectedFilesGrid.innerHTML = selectedFilesData.map(file => `
+        <div class="selected-file-card">
+            <div class="selected-file-header">
+                <div class="selected-file-name">${file.original_name}</div>
+                <button class="remove-selected" onclick="removeFromSelected('${file.file_id}')">×</button>
+            </div>
+            <div class="file-meta">
+                Rows: ${file.rows} | Columns: ${file.columns}<br>
+                ID: ${file.file_id}<br>
+                <small>Uploaded: ${new Date(file.upload_time).toLocaleString()}</small>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Remove file from selected (server-side)
+function removeFromSelected(fileId) {
+    fetch(`/deselect-file/${fileId}`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update client-side
+            selectedFiles.delete(fileId);
+            
+            // Update checkbox
+            const checkbox = document.getElementById(`checkbox-${fileId}`);
+            if (checkbox) {
+                checkbox.checked = false;
+            }
+            
+            // Update card appearance
+            const card = document.getElementById(`card-${fileId}`);
+            if (card) {
+                card.classList.remove('selected');
+            }
+            
+            loadSelectionState();
+            showMessage(data.message, 'success');
+        } else {
+            showMessage(data.message, 'error');
+        }
+    })
+    .catch(error => {
+        showMessage('Error removing file from selection', 'error');
+    });
+}
+
+// Clear all selected files (server-side)
+function clearAllSelected() {
+    fetch('/clear-selection', {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update client-side
+            selectedFiles.clear();
+            
+            // Uncheck all checkboxes
+            document.querySelectorAll('.file-card input[type="checkbox"]').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            
+            // Remove selected class from all cards
+            document.querySelectorAll('.file-card.selected').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            loadSelectionState();
+            showMessage(data.message, 'success');
+        } else {
+            showMessage(data.message, 'error');
+        }
+    })
+    .catch(error => {
+        showMessage('Error clearing selection', 'error');
+    });
+}
+
+// Generate graph from selected files
+function generateGraph() {
+    const generateGraphBtn = document.getElementById('generateGraphBtn');
+    generateGraphBtn.disabled = true;
+    generateGraphBtn.textContent = 'Generating Graph...';
+    
+    showMessage('Generating graph from selected files...', 'success');
+    
+    fetch('/generate-graph', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            displayGraph(data);
+            showMessage('Graph generated successfully!', 'success');
+        } else {
+            showMessage(`Graph generation failed: ${data.message}`, 'error');
+        }
+    })
+    .catch(error => {
+        showMessage(`Error generating graph: ${error.message}`, 'error');
+    })
+    .finally(() => {
+        generateGraphBtn.disabled = false;
+        generateGraphBtn.textContent = 'Generate Graph from Selected Files';
+    });
+}
+
+// Display the generated graph
+function displayGraph(graphData) {
+    const graphContainer = document.querySelector('.graph-container');
+    
+    if (graphData.html) {
+        graphContainer.innerHTML = graphData.html;
+    } else {
+        graphContainer.innerHTML = `
+            <div style="width: 100%; text-align: center;">
+                <h3>Analysis Results</h3>
+                <p>Generated from server-side selected files</p>
+                <div style="background: #f8f9fa; padding: 40px; border-radius: 10px;">
+                    <p><em>Graph visualization would be displayed here</em></p>
+                </div>
+            </div>
+        `;
+    }
+}
+
+// The rest of your existing functions (toggleExpand, loadFilePreview, filterFiles, deleteFile, deleteAllFiles, viewFile) remain the same
+// Toggle file card expansion
+function toggleExpand(fileId) {
+    const card = document.getElementById(`card-${fileId}`);
+    const preview = document.getElementById(`preview-${fileId}`);
+    
+    if (card.classList.contains('expanded')) {
+        card.classList.remove('expanded');
+    } else {
+        card.classList.add('expanded');
+        // Load preview data if not already loaded
+        if (preview.innerHTML.includes('Loading preview')) {
+            loadFilePreview(fileId);
+        }
+    }
+}
+
+// Load file preview data
+function loadFilePreview(fileId) {
+    fetch(`/file-preview/${fileId}`)
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById(`preview-${fileId}`).innerHTML = html;
+        })
+        .catch(error => {
+            document.getElementById(`preview-${fileId}`).innerHTML = 
+                '<div style="text-align: center; color: #dc3545; padding: 20px;">Error loading preview</div>';
+        });
+}
+
+// Filter files based on search
+function filterFiles() {
+    const searchTerm = document.getElementById('searchBar').value.toLowerCase();
+    const fileCards = document.querySelectorAll('.file-card');
+    let visibleCount = 0;
+    
+    fileCards.forEach(card => {
+        const fileName = card.querySelector('.file-name').textContent.toLowerCase();
+        if (fileName.includes(searchTerm)) {
+            card.style.display = 'block';
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    
+    document.getElementById('fileCount').textContent = 
+        `${visibleCount} file${visibleCount !== 1 ? 's' : ''} found`;
+    
+    // Re-sort the displayed files to maintain selection order
+    if (searchTerm === '') {
+        loadFiles();
+    }
+}
+
+// Delete file with confirmation
+function deleteFile(fileId) {
+    if (confirm('Are you sure you want to delete this file?')) {
+        fetch(`/delete/${fileId}`)
+            .then(response => response.text())
+            .then(result => {
+                showMessage('File deleted successfully', 'success');
+                // Also remove from server selection if it was selected
+                if (selectedFiles.has(fileId)) {
+                    fetch(`/deselect-file/${fileId}`, { method: 'POST' });
+                }
+                loadFiles(); // Reload the file list
+                loadSelectionState(); // Reload selection state
+            })
+            .catch(error => {
+                showMessage('Error deleting file', 'error');
+            });
+    }
+}
+
+// Delete all files with confirmation
+function deleteAllFiles() {
+    const fileCount = document.querySelectorAll('.file-card').length;
+    
+    if (fileCount === 0) {
+        showMessage('No files to delete', 'error');
+        return;
+    }
+    
+    if (confirm(`Are you sure you want to delete ALL ${fileCount} files? This action cannot be undone!`)) {
+        const deleteButton = document.getElementById('deleteAllButton');
+        deleteButton.disabled = true;
+        deleteButton.textContent = 'Deleting...';
+        
+        fetch('/delete-all', {
+            method: 'POST'
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(text => { throw new Error(text) });
+            }
+            return response.text();
+        })
+        .then(result => {
+            showMessage(`Successfully deleted all ${fileCount} files`, 'success');
+            // Clear server selection since all files are deleted
+            fetch('/clear-selection', { method: 'POST' });
+            selectedFiles.clear();
+            loadFiles(); // Refresh the file list
+            loadSelectionState(); // Refresh selection state
+        })
+        .catch(error => {
+            showMessage(`Error deleting all files: ${error.message}`, 'error');
+        })
+        .finally(() => {
+            deleteButton.disabled = false;
+            deleteButton.textContent = '🗑️ Delete All Files';
+        });
+    }
+}
+
+// View file (same as expand)
+function viewFile(fileId) {
+    toggleExpand(fileId);
+}
     </script>
 </body>
 </html>
