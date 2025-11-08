@@ -298,7 +298,7 @@ def select_file(file_id):
         if not file_record:
             return jsonify({'success': False, 'message': 'File not found'}), 404
         
-        selected_graph_files.add(file_id)
+        selected_graph_files.add(file_record)
         
         return jsonify({
             'success': True, 
@@ -546,3 +546,26 @@ if __name__ == '__main__':
     print("CSV Upload Page: http://localhost:5000/")
     print("Main Webpage: http://localhost:5000/mrg-schneider-prize")
     app.run(host='0.0.0.0', port=5000, debug=True)
+
+
+
+@app.route('/get-filename/<file_id>')
+def get_filename(file_id):
+    """Get the original filename for a specific file_id"""
+    try:
+        db = get_db()
+        file_record = db.execute(
+            'SELECT original_name FROM files WHERE file_id = ?', (file_id,)
+        ).fetchone()
+        
+        if not file_record:
+            return jsonify({'success': False, 'message': 'File not found'}), 404
+        
+        return jsonify({
+            'success': True,
+            'file_id': file_id,
+            'original_name': file_record['original_name']
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
