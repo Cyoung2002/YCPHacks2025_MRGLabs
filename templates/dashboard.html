@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grease Analysis</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .main-content {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .section {
+            flex: 1;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        .color-display {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .color-box {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .color-swatch {
+            width: 100px;
+            height: 100px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            margin: 0 auto 10px;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .data-table th, .data-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        
+        .data-table th {
+            background-color: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Grease Color Analysis</h1>
+            <p>Upload and analyze grease sample images</p>
+        </header>
+        
+        <div class="main-content">
+            <!-- Left Section: Input Controls -->
+            <div class="section">
+                <h2 class="section-title">Image Processing</h2>
+                
+                <div class="input-group">
+                    <label for="sampleId">Sample ID:</label>
+                    <input type="text" id="sampleId" placeholder="Enter sample ID (e.g., 12345)">
+                </div>
+                
+                <div class="input-group">
+                    <label for="imageUpload">Upload Image:</label>
+                    <input type="file" id="imageUpload" accept=".png,.jpg,.jpeg">
+                </div>
+                
+                <button onclick="processImage()" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    Process Image
+                </button>
+                
+                <div class="color-display">
+                    <div class="color-box">
+                        <div class="color-swatch" id="standardColor" style="background-color: #7846a3;"></div>
+                        <div>Standard Grease</div>
+                    </div>
+                    <div class="color-box">
+                        <div class="color-swatch" id="testColor" style="background-color: #c89632;"></div>
+                        <div>Test Grease</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Section: Results Display -->
+            <div class="section">
+                <h2 class="section-title">Analysis Results</h2>
+                
+                <table class="data-table">
+                    <tr>
+                        <th>Sample ID</th>
+                        <th>Standard RGB</th>
+                        <th>Test RGB</th>
+                        <th>Status</th>
+                    </tr>
+                    <tr>
+                        <td>12345</td>
+                        <td>120, 80, 200</td>
+                        <td>200, 150, 50</td>
+                        <td>Processed</td>
+                    </tr>
+                </table>
+                
+                <div style="margin-top: 20px;">
+                    <h3>Processed Data:</h3>
+                    <div id="results">
+                        <p>Sample ID: <span id="displaySampleId">-</span></p>
+                        <p>Standard RGB: <span id="displayStandardRGB">-</span></p>
+                        <p>Test RGB: <span id="displayTestRGB">-</span></p>
+                        <p>Image: <span id="displayImage">-</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function processImage() {
+            // This will be connected to your Python backend later
+            const sampleId = document.getElementById('sampleId').value;
+            
+            // For now, just display the input values
+            document.getElementById('displaySampleId').textContent = sampleId || '12345';
+            document.getElementById('displayStandardRGB').textContent = '120, 80, 200';
+            document.getElementById('displayTestRGB').textContent = '200, 150, 50';
+            document.getElementById('displayImage').textContent = sampleId ? sampleId + '.png' : '12345.png';
+            
+            alert('Image processing would happen here! Connected to Python backend.');
+        }
+    </script>
+</body>
+</html>
