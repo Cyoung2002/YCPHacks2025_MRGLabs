@@ -4,21 +4,31 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Grease Plotter - MLH Hackathon</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+
+
+
+
   <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      padding: 2em;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-    }
+body {
+  font-family: 'Roboto', sans-serif;
+  margin: 0;
+  padding: 2em;
+  background: linear-gradient(135deg, #001f3f 0%, #004080 100%);
+  min-height: 100vh;
+}
+
+
 
     .container {
       max-width: 800px;
       margin: 0 auto;
       background: white;
       padding: 2em;
-      border-radius: 15px;
+      border-radius: 0;
       box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     }
 
@@ -27,16 +37,32 @@
       margin-bottom: 2em;
     }
 
-    h1 {
-      color: #333;
-      margin-bottom: 0.5em;
-      font-size: 2.5em;
-    }
+h1 {
+  color: #333;
+  margin‑bottom: 0.5em;
+  font‑size: 2.5em;
+  font-family: 'Oswald', sans-serif;
+  font‑weight: 700;
+}
 
-    .subtitle {
-      color: #666;
-      font-size: 1.1em;
-    }
+h1, h2, h3 {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 0.5em;
+}
+
+
+
+
+.subtitle {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 400;
+  color: #666;
+  font-size: 1.1em;
+}
+
+
 
     .upload-section {
       background: #f8f9fa;
@@ -151,14 +177,39 @@
       padding-top: 2em;
       border-top: 2px solid #eee;
     }
+
+.title-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2em;
+}
+
+.logo-inline {
+  width: 150px;
+  height: auto;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* optional */
+}
+
+
+
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="header">
-      <h1>🧪 Grease Plotter</h1>
+<div class="header">
+  <div class="title-row">
+    <img src="{{ url_for('static', filename='MRG_Labs_Logo.jpg') }}" alt="MRG Labs Logo" class="logo-inline">
+    <div>
+      <h1>Grease Plotter</h1>
       <p class="subtitle">Upload your samples and visualize grease data</p>
     </div>
+  </div>
+</div>
+
+
+
 
     <div class="upload-section">
       <form id="uploadForm">
@@ -177,7 +228,7 @@
     </div>
 
     <div class="samples-section">
-      <h3>📊 Sample Results</h3>
+      <h3>Sample Results</h3>
       <div id="sampleList" class="sample-grid"></div>
     </div>
 

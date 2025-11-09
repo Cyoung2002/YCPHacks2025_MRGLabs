@@ -44,7 +44,7 @@ def generate_plot(baseline_path, sample_path, output_path):
 
     fig.savefig(output_path, format="png", dpi=300, bbox_inches="tight")
     plt.close(fig)
-    print(f"✅ Created plot: {output_path}")
+    print(f"Created plot: {output_path}")
 
 
 # =========================
@@ -116,7 +116,7 @@ def upload_files():
         try:
             generate_plot(baseline_path, s["path"], graph_path)
         except Exception as e:
-            print(f"⚠️ Error plotting {s['filename']}: {e}")
+            print(f"Error plotting {s['filename']}: {e}")
         s["graph"] = f"/static/graphs/{graph_filename}"
 
     return jsonify({
