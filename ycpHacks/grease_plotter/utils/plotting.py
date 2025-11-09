@@ -51,7 +51,7 @@ def generate_plot(baseline_path, sample_path, output_path):
     # Legend
     plt.legend(
         loc='lower left',
-        bbox_to_anchor=(0, -0.2),
+        bbox_to_anchor=(0, -0.25),
         borderaxespad=0,
         frameon=False
     )
