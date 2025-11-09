@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Grease Plotter - MLH Hackathon</title>
+
+      <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&display=swap" rel="stylesheet">
+      <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+      <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+
+
+
+
+      <style>
+        body {
+          font-family: 'Roboto', sans-serif;
+          margin: 0;
+          padding: 2em;
+          background: linear-gradient(135deg, #001f3f 0%, #004080 100%);
+          min-height: 100vh;
+        }
+
+
+
+        .container {
+          max-width: 800px;
+          margin: 0 auto;
+          background: white;
+          padding: 2em;
+          border-radius: 0;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .header {
+          text-align: center;
+          margin-bottom: 2em;
+        }
+
+        h1 {
+          color: #333;
+          margin‑bottom: 0.5em;
+          font‑size: 2.5em;
+          font-family: 'Oswald', sans-serif;
+          font‑weight: 700;
+        }
+
+        h2, h3 {
+          font-family: 'Oswald', sans-serif;
+          font-weight: 700;
+          color: #333;
+          margin-bottom: 0.5em;
+        }
+
+        .subtitle {
+          font-family: 'Oswald', sans-serif;
+          font-weight: 400;
+          color: #666;
+          font-size: 1.1em;
+        }
+
+
+        .upload-section {
+          font-family: 'Oswald', sans-serif;
+          background: #f8f9fa;
+          padding: 1.5em;
+          border-radius: 10px;
+          margin-bottom: 2em;
+        }
+
+        .form-group {
+          font-family: 'Oswald', sans-serif;
+          margin-bottom: 1.5em;
+        }
+
+        label {
+          display: block;
+          margin-bottom: 0.5em;
+          font-weight: 600;
+          color: #333;
+        }
+
+        input[type="file"] {
+          width: 100%;
+          max-width: 725px;
+          padding: 0.8em;
+          border: 2px dashed #ddd;
+          border-radius: 8px;
+          background: white;
+          transition: border-color 0.3s;
+          margin: 0 auto;
+        }
+
+        input[type="file"]:hover {
+          border-color: #007bff;
+        }
+
+        .btn {
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* subtle shadow */
+          transition: all 0.3s, box-shadow 0.3s;
+          font-family: 'Roboto', sans-serif;
+          padding: 0.8em 1.5em;
+          border: none;
+          border-radius: 3px;
+          font-weight: 600;
+          cursor: pointer;
+          font-size: 1em;
+        }
+
+        .btn-primary {
+          background: #007bff;
+          color: white;
+        }
+
+        .btn-primary:hover {
+          box-shadow: 0 6px 10px rgba(0, 0, 0, 0.25); /* stronger on hover */
+          transform: translateY(-2px);
+          background: #0056b3;
+          transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+          background: #28a745;
+          color: white;
+        }
+
+        .btn-secondary:hover {
+          box-shadow: 0 6px 10px rgba(0, 0, 0, 0.25); /* stronger on hover */
+          transform: translateY(-2px);
+          background: #1e7e34;
+          transform: translateY(-2px);
+        }
+
+        .samples-section {
+          font-family: 'Roboto', sans-serif;
+          margin: 2em 0;
+        }
+
+        .sample-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+          gap: 1em;
+          margin: 1em 0;
+        }
+
+        .sample-btn {
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* subtle shadow */
+          transition: all 0.3s, box-shadow 0.3s;
+          padding: 0.8em;
+          border: none;
+          background: #6c757d;
+          color: white;
+          border-radius: 3px;
+          cursor: pointer;
+          text-align: center;
+          font-size: 0.9em;
+        }
+
+        .sample-btn:hover {
+          box-shadow: 0 6px 10px rgba(0, 0, 0, 0.25); /* stronger on hover */
+          transform: translateY(-2px);
+          background: #545b62;
+          transform: translateY(-2px);
+        }
+
+        .sample-btn.active {
+          background: #007bff;
+        }
+
+        .graph-container {
+          text-align: center;
+          margin: 2em 0;
+          padding: 1em;
+          background: #f8f9fa;
+          border-radius: 10px;
+        }
+
+        #graph {
+          max-width: 100%;
+          border-radius: 10px;
+          box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .download-section {
+          font-family: 'Roboto', sans-serif;
+          text-align: center;
+          margin-top: 2em;
+          padding-top: 2em;
+          border-top: 2px solid #eee;
+        }
+
+        .title-row {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 1.2em;
+        }
+
+        .logo-inline {
+          width: 150px;
+          height: auto;
+          border-radius: 5px;
+          box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* optional */
+        }
+      </style>
+    </head>
+
+<body>
+  <div class="container">
+<div class="header">
+  <div class="title-row">
+    <img src="{{ url_for('static', filename='MRG_Labs_Logo.jpg') }}" alt="MRG Labs Logo" class="logo-inline">
+    <div>
+      <h1>Grease Plotter</h1>
+      <p class="subtitle">Upload your samples and visualize grease data</p>
+    </div>
+  </div>
+</div>
+
+
+
+
+    <div class="upload-section">
+      <form id="uploadForm">
+        <div class="form-group">
+          <label for="baseline">Baseline File</label>
+          <input type="file" id="baseline" name="baseline" required />
+        </div>
+
+        <div class="form-group">
+          <label for="samples">Sample Files</label>
+          <input type="file" id="samples" name="samples" multiple required />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Upload and Process</button>
+      </form>
+    </div>
+
+    <div class="samples-section">
+      <h3>Sample Results</h3>
+      <div id="sampleList" class="sample-grid"></div>
+    </div>
+
+    <div class="graph-container">
+      <img id="graph" src="" alt="Graph preview" />
+    </div>
+
+    <div class="download-section">
+      <button id="downloadAll" class="btn btn-secondary">Download All Graphs (ZIP)</button>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById("uploadForm");
+    const list = document.getElementById("sampleList");
+    const graph = document.getElementById("graph");
+
+    function showLoading() {
+      const loading = document.createElement('div');
+      loading.id = 'loading';
+      loading.innerHTML = 'Processing...';
+      loading.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0,0,0,0.8);
+        color: white;
+        padding: 1em 2em;
+        border-radius: 8px;
+        z-index: 1000;
+      `;
+      document.body.appendChild(loading);
+    }
+
+    function hideLoading() {
+      const loading = document.getElementById('loading');
+      if (loading) loading.remove();
+    }
+
+    form.onsubmit = (e) => {
+      e.preventDefault();
+      showLoading();
+      const data = new FormData(form);
+      fetch("/upload", { method: "POST", body: data })
+        .then((response) => {
+          if (!response.ok) {
+            // If response is not OK (400, 500, etc.), parse error message
+            return response.json().then(errorData => {
+              throw new Error(errorData.error || `Server error: ${response.status}`);
+            });
+          }
+          return response.json();
+         })
+        .then((data) => {
+          hideLoading();
+          alert(data.message);
+          loadSamples();
+        })
+        .catch(error => {
+          hideLoading();
+          alert('Error: ' + error.message);
+        });
+    };
+
+    function loadSamples() {
+      fetch("/get_samples")
+        .then((res) => res.json())
+        .then((samples) => {
+          list.innerHTML = "";
+          samples.forEach((s, index) => {
+            const btn = document.createElement("button");
+            btn.className = "sample-btn";
+            btn.textContent = s.filename;
+            btn.onclick = () => {
+              document.querySelectorAll('.sample-btn').forEach(b => b.classList.remove('active'));
+              btn.classList.add('active');
+
+              // Add cache-busting timestamp to image URL
+              const timestamp = new Date().getTime();
+              const graphUrl = s.graph + (s.graph.includes('?') ? '&' : '?') + 't=' + timestamp;
+              graph.src = graphUrl;
+            };
+
+            if (index === 0) {
+              btn.classList.add('active');
+              // Add cache-busting timestamp for initial image too
+              const timestamp = new Date().getTime();
+              const graphUrl = s.graph + (s.graph.includes('?') ? '&' : '?') + 't=' + timestamp;
+              graph.src = graphUrl;
+            }
+
+            list.appendChild(btn);
+          });
+        })
+        .catch(error => {
+            console.error('Error loading samples:', error);
+        });
+    }
+
+    document.getElementById("downloadAll").onclick = () => {
+      fetch("/export_all", { method: "POST" })
+        .then(res => {
+          if (res.ok) return res.blob();
+          throw new Error("Download failed");
+        })
+        .then(blob => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "graphs.zip";
+          a.click();
+          URL.revokeObjectURL(url);
+        });
+    };
+
+    // Load samples on page load
+    loadSamples();
+  </script>
+</body>
+</html>
