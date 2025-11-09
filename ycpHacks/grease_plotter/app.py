@@ -5,7 +5,7 @@ from flask import Flask, request, jsonify, send_from_directory, render_template
 import pandas as pd
 import matplotlib
 
-from YCPHacks2025_MRGLabs.ycpHacks.grease_plotter.utils.plotting import generate_plot
+from utils.plotting import generate_plot
 
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt

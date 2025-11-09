@@ -34,6 +34,12 @@ def generate_plot(baseline_path, sample_path, output_path):
     mean_diff = np.mean(diff)
     max_diff = np.max(diff)
 
+    # Correlation coefficient
+    corr = np.corrcoef(y_baseline, y_sample)[0, 1]
+
+    # Mean Squared Error
+    mse = np.mean((y_baseline - y_sample) ** 2)
+
     text = (f"Mean diff: {mean_diff:.3f}\n"
             f"Max diff: {max_diff:.3f}\n"
             f"Corr: {corr:.3f}\n"
@@ -53,4 +59,4 @@ def generate_plot(baseline_path, sample_path, output_path):
     # Save to output path
     fig.savefig(output_path, format='png', dpi=300, bbox_inches='tight')
     plt.close(fig)
-    print(f"✅ Saved plot to {output_path}")
+    print(f" Saved plot to {output_path}")
