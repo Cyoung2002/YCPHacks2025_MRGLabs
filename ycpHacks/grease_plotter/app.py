@@ -148,16 +148,33 @@ def preview(filename):
 # =========================
 #  ROUTE: export all as zip
 # =========================
+
 @app.route("/export_all", methods=["POST"])
 def export_all():
-    zip_filename = "graphs.zip"
+    import os
+    from flask import send_file
+
+    # Get only the baseline filename, not the full path
+    baseline_path = state.get("baseline")
+    if baseline_path:
+        baseline_file = os.path.basename(baseline_path)
+    else:
+        baseline_file = "baseline.csv"
+
+    zip_base = os.path.splitext(baseline_file)[0].replace(" ", "_")
+    zip_filename = f"{zip_base}_graphs.zip"
     zip_path = os.path.join(GRAPH_FOLDER, zip_filename)
+
+    # Make sure the folder exists
+    os.makedirs(GRAPH_FOLDER, exist_ok=True)
+
     with zipfile.ZipFile(zip_path, "w") as zipf:
         for s in state["samples"]:
-            graph_path = os.path.join("static", "graphs", f"{os.path.splitext(s['filename'])[0]}.png")
+            graph_path = os.path.join(GRAPH_FOLDER, f"{os.path.splitext(s['filename'])[0]}.png")
             if os.path.exists(graph_path):
                 zipf.write(graph_path, os.path.basename(graph_path))
-    return send_from_directory(GRAPH_FOLDER, zip_filename, as_attachment=True)
+
+    return send_file(zip_path, as_attachment=True, download_name=zip_filename)
 
 
 # =========================

@@ -339,20 +339,33 @@
     }
 
     document.getElementById("downloadAll").onclick = () => {
-      fetch("/export_all", { method: "POST" })
-        .then(res => {
-          if (res.ok) return res.blob();
-          throw new Error("Download failed");
-        })
-        .then(blob => {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = "graphs.zip";
-          a.click();
-          URL.revokeObjectURL(url);
-        });
-    };
+     fetch("/export_all", { method: "POST" })
+    .then(res => {
+      if (!res.ok) throw new Error("Download failed");
+      return res.blob().then(blob => ({ blob, res }));
+    })
+    .then(({ blob, res }) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+
+      // Fallback filename
+      let filename = "graphs.zip";
+      const disposition = res.headers.get("Content-Disposition");
+      if (disposition && disposition.includes("filename=")) {
+        filename = disposition.split("filename=")[1].replace(/"/g, '');
+      }
+
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Download failed, check console for details.");
+    });
+};
+
 
     // Load samples on page load
     loadSamples();
