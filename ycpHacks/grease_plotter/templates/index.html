@@ -319,16 +319,26 @@ h1, h2, h3 {
             btn.onclick = () => {
               document.querySelectorAll('.sample-btn').forEach(b => b.classList.remove('active'));
               btn.classList.add('active');
-              graph.src = s.graph;
+
+              // Add cache-busting timestamp to image URL
+              const timestamp = new Date().getTime();
+              const graphUrl = s.graph + (s.graph.includes('?') ? '&' : '?') + 't=' + timestamp;
+              graph.src = graphUrl;
             };
 
             if (index === 0) {
               btn.classList.add('active');
-              graph.src = s.graph;
+              // Add cache-busting timestamp for initial image too
+              const timestamp = new Date().getTime();
+              const graphUrl = s.graph + (s.graph.includes('?') ? '&' : '?') + 't=' + timestamp;
+              graph.src = graphUrl;
             }
 
             list.appendChild(btn);
           });
+        })
+        .catch(error => {
+            console.error('Error loading samples:', error);
         });
     }
 
