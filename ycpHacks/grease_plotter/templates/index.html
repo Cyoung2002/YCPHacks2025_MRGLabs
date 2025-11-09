@@ -65,6 +65,7 @@ h1, h2, h3 {
 
 
     .upload-section {
+      font-family: 'Roboto', sans-serif;
       background: #f8f9fa;
       padding: 1.5em;
       border-radius: 10px;
@@ -72,6 +73,7 @@ h1, h2, h3 {
     }
 
     .form-group {
+      font-family: 'Roboto', sans-serif;
       margin-bottom: 1.5em;
     }
 
@@ -96,12 +98,14 @@ h1, h2, h3 {
     }
 
     .btn {
+     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* subtle shadow */
+      transition: all 0.3s, box-shadow 0.3s;
+      font-family: 'Roboto', sans-serif;
       padding: 0.8em 1.5em;
       border: none;
-      border-radius: 8px;
+      border-radius: 3px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.3s;
       font-size: 1em;
     }
 
@@ -111,6 +115,8 @@ h1, h2, h3 {
     }
 
     .btn-primary:hover {
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.25); /* stronger on hover */
+  transform: translateY(-2px);
       background: #0056b3;
       transform: translateY(-2px);
     }
@@ -121,11 +127,14 @@ h1, h2, h3 {
     }
 
     .btn-secondary:hover {
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.25); /* stronger on hover */
+  transform: translateY(-2px);
       background: #1e7e34;
       transform: translateY(-2px);
     }
 
     .samples-section {
+      font-family: 'Roboto', sans-serif;
       margin: 2em 0;
     }
 
@@ -137,18 +146,21 @@ h1, h2, h3 {
     }
 
     .sample-btn {
+     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* subtle shadow */
+  transition: all 0.3s, box-shadow 0.3s;
       padding: 0.8em;
       border: none;
       background: #6c757d;
       color: white;
-      border-radius: 8px;
+      border-radius: 3px;
       cursor: pointer;
-      transition: all 0.3s;
       text-align: center;
       font-size: 0.9em;
     }
 
     .sample-btn:hover {
+     box-shadow: 0 6px 10px rgba(0, 0, 0, 0.25); /* stronger on hover */
+  transform: translateY(-2px);
       background: #545b62;
       transform: translateY(-2px);
     }
@@ -172,6 +184,7 @@ h1, h2, h3 {
     }
 
     .download-section {
+      font-family: 'Roboto', sans-serif;
       text-align: center;
       margin-top: 2em;
       padding-top: 2em;
@@ -237,7 +250,7 @@ h1, h2, h3 {
     </div>
 
     <div class="download-section">
-      <button id="downloadAll" class="btn btn-secondary">📥 Download All Graphs (ZIP)</button>
+      <button id="downloadAll" class="btn btn-secondary">Download All Graphs (ZIP)</button>
     </div>
   </div>
 
