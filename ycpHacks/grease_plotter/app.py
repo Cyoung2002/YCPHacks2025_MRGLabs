@@ -34,6 +34,34 @@ def upload_files():
     baseline_file = request.files.get("baseline")
     sample_files = request.files.getlist("samples")
 
+    # --- Validation helper Functions ---
+    def is_valid_baseline_filename(filename):
+        """Check if baseline filename is valid (contains letters--before .csv extension"""
+        name_without_ext = os.path.splitext(filename)[0]
+        return any(c.isalpha() for c in name_without_ext)
+
+    def is_valid_sample_filename(filename):
+        """Check if sample filename is valid (contains only numbers--before .csv extension)"""
+        name_without_ext = os.path.splitext(filename)[0]
+        return name_without_ext.isdigit()
+
+    # --- Validate Baseline File ---
+    if baseline_file and baseline_file.filename:
+        if not is_valid_baseline_filename(baseline_file.filename):
+            return jsonify({"error": "Not a baseline file! Must contain baseline title."}), 400
+
+    # --- Validate Sample Files ---
+    if sample_files:
+        for sample_file in sample_files:
+            if sample_file.filename and not is_valid_sample_filename(sample_file.filename):
+                return jsonify({"error": f"Sample file '{sample_file.filename}' is not a sample file! Must contain sample title."}), 400
+
+    # --- Validate Sample Files ---
+    if sample_files:
+        for sample_file in sample_files:
+            if sample_file.filename and not is_valid_sample_filename(sample_file.filename):
+                return jsonify({"error": f"Sample file '{sample_file.filename}' is not a sample file! Must contain sample title."}), 400
+
     # --- Step 1: Clear all folders ---
     for folder in [os.path.join(UPLOAD_FOLDER, "baseline"),
                    os.path.join(UPLOAD_FOLDER, "samples"),
