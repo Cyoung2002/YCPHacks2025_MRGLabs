@@ -4,6 +4,9 @@ import zipfile
 from flask import Flask, request, jsonify, send_from_directory, render_template
 import pandas as pd
 import matplotlib
+
+from utils.plotting import generate_plot
+
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
@@ -15,36 +18,6 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(GRAPH_FOLDER, exist_ok=True)
 
 state = {"baseline": None, "samples": []}
-
-
-# =========================
-#  HELPER: generate_plot()
-# =========================
-def generate_plot(baseline_path, sample_path, output_path):
-    """Generate and save a plot comparing baseline vs sample."""
-    base = pd.read_csv(baseline_path, skiprows=1)
-    sample = pd.read_csv(sample_path, skiprows=1)
-
-    base_label = os.path.splitext(os.path.basename(baseline_path))[0]
-    sample_label = os.path.splitext(os.path.basename(sample_path))[0]
-
-    fig, ax = plt.subplots(figsize=(8, 5))
-    ax.plot(base["cm-1"], base["A"], label=base_label, linewidth=1, color = 'green')
-    ax.plot(sample["cm-1"], sample["A"], label=sample_label, linewidth=1, color = 'blue')
-
-    plt.xlabel("cm-1")
-    plt.ylabel("A")
-
-    plt.legend(
-        loc="lower left",
-        bbox_to_anchor=(0, -0.1),
-        borderaxespad=0,
-        frameon=False
-    )
-
-    fig.savefig(output_path, format="png", dpi=300, bbox_inches="tight")
-    plt.close(fig)
-    print(f"Created plot: {output_path}")
 
 
 # =========================
