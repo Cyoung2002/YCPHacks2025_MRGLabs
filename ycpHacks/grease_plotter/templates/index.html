@@ -223,7 +223,15 @@
       showLoading();
       const data = new FormData(form);
       fetch("/upload", { method: "POST", body: data })
-        .then((res) => res.json())
+        .then((response) => {
+          if (!response.ok) {
+            // If response is not OK (400, 500, etc.), parse error message
+            return response.json().then(errorData => {
+              throw new Error(errorData.error || `Server error: ${response.status}`);
+            });
+          }
+          return response.json();
+         })
         .then((data) => {
           hideLoading();
           alert(data.message);
