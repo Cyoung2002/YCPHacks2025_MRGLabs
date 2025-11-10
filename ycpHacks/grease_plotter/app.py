@@ -47,20 +47,27 @@ def upload_files():
 
     # --- Validate Baseline File ---
     if baseline_file and baseline_file.filename:
+        if baseline_file.filename =='':
+            return jsonify({"error": "Please select a baseline file"}), 400
+        if not baseline_file.filename.lower().endswith(".csv"):
+            return jsonify({"error": "Baseline file MUST be a CSV file"}), 400
         if not is_valid_baseline_filename(baseline_file.filename):
             return jsonify({"error": "Not a baseline file! Must contain baseline title."}), 400
 
     # --- Validate Sample Files ---
+    valid_samples = []
     if sample_files:
         for sample_file in sample_files:
+            if not sample_file.filename:
+                continue
+            if not sample_file.filename.lower().endswith('.csv'):
+                return jsonify({"error": f"Sample file '{sample_file.filename}' MUST be a CSV file"}), 400
             if sample_file.filename and not is_valid_sample_filename(sample_file.filename):
                 return jsonify({"error": f"Sample file '{sample_file.filename}' is not a sample file! Must contain sample title."}), 400
+            valid_samples.append(sample_file)
 
-    # --- Validate Sample Files ---
-    if sample_files:
-        for sample_file in sample_files:
-            if sample_file.filename and not is_valid_sample_filename(sample_file.filename):
-                return jsonify({"error": f"Sample file '{sample_file.filename}' is not a sample file! Must contain sample title."}), 400
+            if not valid_samples:
+                return jsonify({"error": "No valid samples selected"}), 400
 
     # --- Step 1: Clear all folders ---
     for folder in [os.path.join(UPLOAD_FOLDER, "baseline"),
